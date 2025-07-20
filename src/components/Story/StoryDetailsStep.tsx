@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FileText, Upload, Tag, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 =======
+=======
+>>>>>>> e9eef45 (Implement story creation enhancements)
 import { FileText, Upload, Tag, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,8 +20,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+<<<<<<< HEAD
 import { useRef } from 'react';
 >>>>>>> aae9368 (Update image upload functionality)
+=======
+>>>>>>> e9eef45 (Implement story creation enhancements)
 
 interface StoryDetailsStepProps {
   data: {
@@ -37,6 +43,7 @@ interface StoryDetailsStepProps {
 }
 
 const availableGenres = [
+<<<<<<< HEAD
   "Fantasy",
   "Adventure",
   "Steampunk",
@@ -57,17 +64,30 @@ const StoryDetailsStep = ({
 }: StoryDetailsStepProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+=======
+  'Fantasy', 'Adventure', 'Steampunk', 'Political', 'Revolution', 
+  'Technology', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy'
+];
+
+const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => {
+  const { toast } = useToast();
+>>>>>>> e9eef45 (Implement story creation enhancements)
 
   const handleGenreAdd = (genre: string) => {
     if (genre && !data.genres.includes(genre) && data.genres.length < 5) {
       onUpdate({
+<<<<<<< HEAD
         genres: [...data.genres, genre],
+=======
+        genres: [...data.genres, genre]
+>>>>>>> e9eef45 (Implement story creation enhancements)
       });
     }
   };
 
   const handleGenreRemove = (genre: string) => {
     onUpdate({
+<<<<<<< HEAD
       genres: data.genres.filter((g) => g !== genre),
     });
   };
@@ -88,6 +108,12 @@ const StoryDetailsStep = ({
     }
   };
 
+=======
+      genres: data.genres.filter(g => g !== genre)
+    });
+  };
+
+>>>>>>> e9eef45 (Implement story creation enhancements)
   return (
     <Card className="p-8">
       <div className="flex items-center space-x-3 mb-6">
@@ -96,7 +122,11 @@ const StoryDetailsStep = ({
         </div>
         <h2 className="text-xl font-display font-bold">Story Details</h2>
       </div>
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> e9eef45 (Implement story creation enhancements)
       <div className="space-y-6">
         {/* Title */}
         <div className="space-y-2">
@@ -111,9 +141,13 @@ const StoryDetailsStep = ({
             aria-invalid={!!errors.title}
           />
           {errors.title && (
+<<<<<<< HEAD
             <p id="title-error" className="text-sm text-destructive">
               {errors.title}
             </p>
+=======
+            <p id="title-error" className="text-sm text-destructive">{errors.title}</p>
+>>>>>>> e9eef45 (Implement story creation enhancements)
           )}
         </div>
 
@@ -127,23 +161,32 @@ const StoryDetailsStep = ({
             maxLength={500}
             value={data.summary}
             onChange={(e) => onUpdate({ summary: e.target.value })}
+<<<<<<< HEAD
             aria-describedby={`summary-count ${
               errors.summary ? "summary-error" : ""
             }`.trim()}
+=======
+            aria-describedby={`summary-count ${errors.summary ? "summary-error" : ""}`.trim()}
+>>>>>>> e9eef45 (Implement story creation enhancements)
             aria-invalid={!!errors.summary}
           />
           <p id="summary-count" className="text-sm text-muted-foreground">
             {data.summary.length}/500 characters
           </p>
           {errors.summary && (
+<<<<<<< HEAD
             <p id="summary-error" className="text-sm text-destructive">
               {errors.summary}
             </p>
+=======
+            <p id="summary-error" className="text-sm text-destructive">{errors.summary}</p>
+>>>>>>> e9eef45 (Implement story creation enhancements)
           )}
         </div>
 
         {/* Cover Image */}
         <div className="space-y-2">
+<<<<<<< HEAD
           <Label htmlFor="coverImage">Cover Image URL or Upload</Label>
           <div className="flex gap-3">
             <Input
@@ -183,21 +226,47 @@ const StoryDetailsStep = ({
             <div className="mt-3">
               <img
                 src={data.coverImage}
+=======
+          <Label htmlFor="coverImage">Cover Image URL</Label>
+          <div className="flex gap-3">
+            <Input
+              id="coverImage"
+              placeholder="https://..."
+              value={data.coverImage}
+              onChange={(e) => onUpdate({ coverImage: e.target.value })}
+              aria-describedby={errors.coverImage ? "coverImage-error" : undefined}
+              aria-invalid={!!errors.coverImage}
+            />
+            <Button type="button" variant="outline" onClick={() => toast({ title: "Upload functionality coming soon!" })}>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload
+            </Button>
+          </div>
+          {data.coverImage && (
+            <div className="mt-3">
+              <img 
+                src={data.coverImage} 
+>>>>>>> e9eef45 (Implement story creation enhancements)
                 alt="Cover preview"
                 className="w-32 h-48 object-cover rounded-lg border border-border"
               />
             </div>
           )}
           {errors.coverImage && (
+<<<<<<< HEAD
             <p id="coverImage-error" className="text-sm text-destructive">
               {errors.coverImage}
             </p>
+=======
+            <p id="coverImage-error" className="text-sm text-destructive">{errors.coverImage}</p>
+>>>>>>> e9eef45 (Implement story creation enhancements)
           )}
         </div>
 
         {/* Genres */}
         <div className="space-y-2">
           <Label>Genres * (1-5 genres)</Label>
+<<<<<<< HEAD
 
           {/* Available Genres */}
           <div className="flex flex-wrap gap-2 mb-3">
@@ -220,6 +289,26 @@ const StoryDetailsStep = ({
               ))}
           </div>
 
+=======
+          
+          {/* Available Genres */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="text-sm text-muted-foreground w-full mb-2">Click to add genres:</span>
+            {availableGenres.filter(g => !data.genres.includes(g)).map((genre) => (
+              <button
+                key={genre}
+                type="button"
+                onClick={() => handleGenreAdd(genre)}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                disabled={data.genres.length >= 5}
+              >
+                <Tag className="h-3 w-3 mr-1" />
+                {genre}
+              </button>
+            ))}
+          </div>
+          
+>>>>>>> e9eef45 (Implement story creation enhancements)
           {/* Selected Genres */}
           <div className="flex flex-wrap gap-2">
             {data.genres.map((genre) => (
@@ -245,4 +334,8 @@ const StoryDetailsStep = ({
   );
 };
 
+<<<<<<< HEAD
 export default StoryDetailsStep;
+=======
+export default StoryDetailsStep;
+>>>>>>> e9eef45 (Implement story creation enhancements)
