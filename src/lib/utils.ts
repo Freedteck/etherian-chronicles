@@ -1,11 +1,15 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+<<<<<<< HEAD
 import { createThirdwebClient, getContract } from "thirdweb";
 import { etherlinkTestnet } from "thirdweb/chains";
 import { inAppWallet, createWallet } from "thirdweb/wallets";
 import CONTRACT_ADDRESS_JSON from "../deployed_addresses.json";
 import { EtherianChronicle__factory } from "@/typechain-types";
 import { checksumAddress } from "thirdweb/utils";
+=======
+import { createThirdwebClient } from "thirdweb";
+>>>>>>> 6732061 (Add thirdweb and relevant libraries)
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,6 +18,7 @@ export function cn(...inputs: ClassValue[]) {
 export const client = createThirdwebClient({
   clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
 });
+<<<<<<< HEAD
 
 export const wallets = [
   inAppWallet({
@@ -61,3 +66,5 @@ export const formatAddress = (address: string) => {
   const formattedAddress = checksumAddress(address);
   return `${formattedAddress.slice(0, 6)}...${formattedAddress.slice(-4)}`;
 };
+=======
+>>>>>>> 6732061 (Add thirdweb and relevant libraries)
