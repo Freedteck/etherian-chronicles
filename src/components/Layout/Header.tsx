@@ -16,8 +16,7 @@ const Header = () => {
   const navigation = [
     { name: 'Stories', href: '/stories', icon: Book },
     { name: 'Proposals', href: '/proposals', icon: Scroll },
-    { name: 'Community', href: '/community', icon: Users },
-    { name: 'Profile', href: '/profile', icon: Crown }
+    { name: 'Community', href: '/community', icon: Users }
   ];
 
   return (
@@ -73,15 +72,15 @@ const Header = () => {
                     <ChevronDown className="h-4 w-4 ml-2" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center">
+                <DropdownMenuContent align="end" className="w-48 bg-card border border-border shadow-xl">
+                  <DropdownMenuItem asChild className="hover:bg-accent/20 focus:bg-accent/20 transition-colors border-b border-border/30 last:border-b-0">
+                    <Link to="/profile" className="flex items-center px-3 py-2.5">
                       <Crown className="h-4 w-4 mr-2" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/create" className="flex items-center">
+                  <DropdownMenuItem asChild className="hover:bg-accent/20 focus:bg-accent/20 transition-colors border-b border-border/30 last:border-b-0">
+                    <Link to="/create" className="flex items-center px-3 py-2.5">
                       <Scroll className="h-4 w-4 mr-2" />
                       Create Story
                     </Link>
