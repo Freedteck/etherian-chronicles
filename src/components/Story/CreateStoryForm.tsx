@@ -132,6 +132,8 @@ const CreateStoryForm = () => {
 
 >>>>>>> d82711f (Update contract call)
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingToastId, setLoadingToastId] = useState<string | null>(null);
 
   const validateStep = (step: number): boolean => {
     const newErrors: FormErrors = {};
@@ -270,11 +272,15 @@ const CreateStoryForm = () => {
     console.log("Submitting story with data:", formData);
 
     if (validateStep(currentStep)) {
-      toast({
+      setIsSubmitting(true);
+      
+      const toastResult = toast({
         title: "Creating story...",
         description: "Your story is being created. Please wait.",
       });
+      setLoadingToastId(toastResult.id);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       navigate("/stories");
 =======
@@ -308,32 +314,71 @@ const CreateStoryForm = () => {
         votingOptions: formData.votingOptions,
         genres: formData.genres,
       };
+=======
+      try {
+        const firstChapter = {
+          title: formData.chapterTitle,
+          content: formData.firstChapter,
+          votingOptions: formData.votingOptions,
+          genres: formData.genres,
+        };
 
-      const firstChapterIpfsUrl = await uploadJsonToPinata(firstChapter);
-      const storyData = {
-        _title: formData.title,
-        _summary: formData.summary,
-        _ipfsHashImage: formData.coverImage,
-        _ipfsHashChapter1Content: firstChapterIpfsUrl,
-        _chapter1Choices: formData.votingOptions,
-        _collaborators: formData.collaborators.map((c) => c.address),
-      };
-      if (!firstChapterIpfsUrl) {
-        toast({
-          variant: "destructive",
-          title: "Error uploading first chapter",
-          description: "Please try again later.",
-        });
-        return;
-      } else {
+        const firstChapterIpfsUrl = await uploadJsonToPinata(firstChapter);
+        
+        if (!firstChapterIpfsUrl) {
+          if (loadingToastId) {
+            toastResult.dismiss();
+          }
+          toast({
+            variant: "destructive",
+            title: "Error uploading first chapter",
+            description: "Please try again later.",
+          });
+          return;
+        }
+
+        const storyData = {
+          _title: formData.title,
+          _summary: formData.summary,
+          _ipfsHashImage: formData.coverImage,
+          _ipfsHashChapter1Content: firstChapterIpfsUrl,
+          _chapter1Choices: formData.votingOptions,
+          _collaborators: formData.collaborators.map((c) => c.address),
+        };
+>>>>>>> 83601da (feat: Add toaster success variant and loading states)
+
         const transactionHash = await createStory(storyData, account);
+        
+        if (loadingToastId) {
+          toastResult.dismiss();
+        }
+        
         if (transactionHash) {
           toast({
+            variant: "success",
             title: "Story created successfully",
             description: "Your story has been created.",
           });
           navigate("/stories");
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Transaction failed",
+            description: "Please try again later.",
+          });
         }
+      } catch (error) {
+        if (loadingToastId) {
+          toastResult.dismiss();
+        }
+        toast({
+          variant: "destructive",
+          title: "Error creating story",
+          description: "Please try again later.",
+        });
+      } finally {
+        setIsSubmitting(false);
+        setLoadingToastId(null);
       }
 >>>>>>> 9508366 (Update contract calls)
     }
@@ -540,6 +585,7 @@ const CreateStoryForm = () => {
 >>>>>>> d82711f (Update contract call)
             <Button
               onClick={handleSubmit}
+              disabled={isSubmitting}
               className="btn-mystical flex items-center"
             >
 <<<<<<< HEAD
@@ -549,7 +595,7 @@ const CreateStoryForm = () => {
 =======
 >>>>>>> d82711f (Update contract call)
               <Crown className="h-4 w-4 mr-2" />
-              Create Story
+              {isSubmitting ? "Creating..." : "Create Story"}
             </Button>
           )}
         </div>

@@ -45,7 +45,7 @@ const Index = () => {
       <StorySlideshow stories={featuredStories} />
 
       {/* Proposals Carousel */}
-      <ProposalsCarousel proposals={activeProposals} />
+      <ProposalsCarousel proposals={activeProposals} isLoading={isProposalLoading} />
 
       {/* Featured Stories */}
       <section className="py-16">

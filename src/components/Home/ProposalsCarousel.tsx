@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProposalCard from "@/components/Proposal/ProposalCard";
 
-const ProposalsCarousel = ({ proposals }) => {
+const ProposalsCarousel = ({ proposals, isLoading }) => {
   const scrollRef = useRef(null);
 
   const scroll = (direction) => {
@@ -61,11 +61,24 @@ const ProposalsCarousel = ({ proposals }) => {
           className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {proposals.map((proposal) => (
-            <div key={proposal.storyId} className="flex-none w-80 min-w-80">
-              <ProposalCard proposal={proposal} />
-            </div>
-          ))}
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="flex-none w-80 min-w-80">
+                <div className="animate-pulse bg-card rounded-xl border border-border p-6 space-y-4">
+                  <div className="h-48 bg-muted rounded-lg"></div>
+                  <div className="h-6 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-2/3"></div>
+                </div>
+              </div>
+            ))
+          ) : (
+            proposals.map((proposal) => (
+              <div key={proposal.storyId} className="flex-none w-80 min-w-80">
+                <ProposalCard proposal={proposal} />
+              </div>
+            ))
+          )}
         </div>
 
         {/* Mobile scroll hint */}
