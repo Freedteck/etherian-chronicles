@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProposalCard from "@/components/Proposal/ProposalCard";
+import CardLoading from "../ui/cardLoaing";
 
 const ProposalsCarousel = ({ proposals, isLoading }) => {
   const scrollRef = useRef(null);
@@ -62,16 +63,7 @@ const ProposalsCarousel = ({ proposals, isLoading }) => {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {isLoading ? (
-            Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="flex-none w-80 min-w-80">
-                <div className="animate-pulse bg-card rounded-xl border border-border p-6 space-y-4">
-                  <div className="h-48 bg-muted rounded-lg"></div>
-                  <div className="h-6 bg-muted rounded w-3/4"></div>
-                  <div className="h-4 bg-muted rounded w-full"></div>
-                  <div className="h-4 bg-muted rounded w-2/3"></div>
-                </div>
-              </div>
-            ))
+            <CardLoading />
           ) : (
             proposals.map((proposal) => (
               <div key={proposal.storyId} className="flex-none w-80 min-w-80">

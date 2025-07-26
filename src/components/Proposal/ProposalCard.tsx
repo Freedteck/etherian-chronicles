@@ -92,11 +92,11 @@ const ProposalCard = ({ proposal, className = "" }) => {
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-1">
                 <ThumbsUp className="h-3 w-3 text-primary" />
-                <span>{proposal.proposalYesVote}</span>
+                <span>{proposal.proposalYesVotes}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <ThumbsDown className="h-3 w-3 text-destructive" />
-                <span>{proposal.proposalNoVote}</span>
+                <span>{proposal.proposalNoVotes}</span>
               </div>
             </div>
             <span>{Math.round(approvalPercentage)}% approval</span>

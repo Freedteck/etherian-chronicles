@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   Crown,
-  BookOpen,
   Users,
   Scroll,
   TrendingUp,
@@ -13,8 +12,8 @@ import StoryCard from "@/components/Story/StoryCard";
 import Header from "@/components/Layout/Header";
 import StorySlideshow from "@/components/Home/StorySlideshow";
 import ProposalsCarousel from "@/components/Home/ProposalsCarousel";
-import { mockStories, mockProposals } from "@/data/mockData";
-import { getActiveProposals, getActiveStories } from "@/data/proposalData";
+import { mockStories } from "@/data/mockData";
+import { getActiveProposals } from "@/data/proposalData";
 import { useEffect, useState } from "react";
 
 const Index = () => {
@@ -26,12 +25,14 @@ const Index = () => {
 
   useEffect(() => {
     const fetchProposals = async () => {
-      const { activeProposals, isProposalLoading } = await getActiveProposals();
+      setIsProposalLoading(true);
+      const { activeProposals, isProposalLoading: isLoading } =
+        await getActiveProposals();
       setActiveProposals(activeProposals);
-      setIsProposalLoading(isProposalLoading);
+      setIsProposalLoading(isLoading);
 
       console.log("Active Proposals:", activeProposals);
-      console.log("Is Proposal Loading:", isProposalLoading);
+      console.log("Is Proposal Loading:", isLoading);
     };
 
     fetchProposals();
@@ -45,7 +46,10 @@ const Index = () => {
       <StorySlideshow stories={featuredStories} />
 
       {/* Proposals Carousel */}
-      <ProposalsCarousel proposals={activeProposals} isLoading={isProposalLoading} />
+      <ProposalsCarousel
+        proposals={activeProposals}
+        isLoading={isProposalLoading}
+      />
 
       {/* Featured Stories */}
       <section className="py-16">

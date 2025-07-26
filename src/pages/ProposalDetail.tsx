@@ -21,6 +21,7 @@ import {
 } from "@/data/proposalData";
 import { formatAddress, getTimeAgo, getTimeRemaining } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
+import ProposalLoading from "@/components/ui/proposalLoading";
 
 const ProposalDetail = () => {
   const { id } = useParams();
@@ -53,17 +54,7 @@ const ProposalDetail = () => {
   }, [fetchProposal]);
 
   if (isProposalLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-muted rounded w-1/3 mx-auto"></div>
-            <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-          </div>
-        </div>
-      </div>
-    );
+    return <ProposalLoading />;
   }
 
   if (!proposal) {
@@ -92,7 +83,7 @@ const ProposalDetail = () => {
   const handleVote = async (voteType) => {
     if (hasVoted) return;
 
-    toast({
+    const toastResult = toast({
       title: "Submitting your vote...",
       description: "Please wait while we process your vote.",
     });
@@ -102,8 +93,13 @@ const ProposalDetail = () => {
       account // the account sending the transaction
     );
 
+    if (toastResult.id) {
+      toastResult.dismiss();
+    }
+
     if (transactionHash) {
       toast({
+        variant: "success",
         title: "Vote submitted",
         description: `You voted ${
           voteType === 1 ? "For" : "Against"
@@ -111,6 +107,14 @@ const ProposalDetail = () => {
       });
 
       fetchProposal();
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Vote failed",
+        description: "There was an error submitting your vote.",
+      });
+
+      toastResult.dismiss();
     }
   };
 
