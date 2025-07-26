@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FileText, Upload, Tag, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+=======
+import { FileText, Upload, Tag, X, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { useRef } from 'react';
+>>>>>>> aae9368 (Update image upload functionality)
 
 interface StoryDetailsStepProps {
   data: {
@@ -44,6 +56,7 @@ const StoryDetailsStep = ({
   onUpdate,
 }: StoryDetailsStepProps) => {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenreAdd = (genre: string) => {
     if (genre && !data.genres.includes(genre) && data.genres.length < 5) {
@@ -57,6 +70,22 @@ const StoryDetailsStep = ({
     onUpdate({
       genres: data.genres.filter((g) => g !== genre),
     });
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const fileName = file.name;
+      onUpdate({ coverImage: fileName });
+      toast({ 
+        title: `${fileName} uploaded`,
+        description: "Cover image file selected successfully"
+      });
+    }
   };
 
   return (
@@ -115,11 +144,11 @@ const StoryDetailsStep = ({
 
         {/* Cover Image */}
         <div className="space-y-2">
-          <Label htmlFor="coverImage">Cover Image URL</Label>
+          <Label htmlFor="coverImage">Cover Image URL or Upload</Label>
           <div className="flex gap-3">
             <Input
               id="coverImage"
-              placeholder="https://..."
+              placeholder="https://... or upload a file"
               value={data.coverImage}
               onChange={(e) => onUpdate({ coverImage: e.target.value })}
               aria-describedby={
@@ -127,6 +156,7 @@ const StoryDetailsStep = ({
               }
               aria-invalid={!!errors.coverImage}
             />
+<<<<<<< HEAD
             <Button
               type="button"
               variant="outline"
@@ -134,9 +164,20 @@ const StoryDetailsStep = ({
                 toast({ title: "Upload functionality coming soon!" })
               }
             >
+=======
+            <Button type="button" variant="outline" onClick={handleUploadClick}>
+>>>>>>> aae9368 (Update image upload functionality)
               <Upload className="h-4 w-4 mr-2" />
               Upload
             </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+              aria-hidden="true"
+            />
           </div>
           {data.coverImage && (
             <div className="mt-3">
