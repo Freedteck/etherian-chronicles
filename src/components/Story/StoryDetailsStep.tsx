@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> e9eef45 (Implement story creation enhancements)
@@ -35,6 +36,10 @@ import { useRef } from 'react';
 =======
 import { useRef } from 'react';
 >>>>>>> aae9368 (Update image upload functionality)
+=======
+import { useRef } from "react";
+import { uploadFileToPinata } from "@/lib/pinata";
+>>>>>>> 9508366 (Update contract calls)
 
 interface StoryDetailsStepProps {
   data: {
@@ -79,6 +84,7 @@ const StoryDetailsStep = ({
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   'Fantasy', 'Adventure', 'Steampunk', 'Political', 'Revolution', 
   'Technology', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy'
@@ -95,6 +101,8 @@ const StoryDetailsStep = ({
 >>>>>>> e9eef45 (Implement story creation enhancements)
 =======
 >>>>>>> aae9368 (Update image upload functionality)
+=======
+>>>>>>> 9508366 (Update contract calls)
 
   const handleGenreAdd = (genre: string) => {
     if (genre && !data.genres.includes(genre) && data.genres.length < 5) {
@@ -124,6 +132,7 @@ const StoryDetailsStep = ({
     fileInputRef.current?.click();
   };
 
+<<<<<<< HEAD
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -132,10 +141,35 @@ const StoryDetailsStep = ({
       toast({ 
         title: `${fileName} uploaded`,
         description: "Cover image file selected successfully"
+=======
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toast({
+        title: "Uploading cover image...",
+        description: `Uploading ${file.name}...`,
+      });
+      const fileUrl = await uploadFileToPinata(file);
+      if (!fileUrl) {
+        toast({
+          variant: "destructive",
+          title: "Error uploading cover image",
+          description: "Please try again later.",
+        });
+        return;
+      }
+      onUpdate({ coverImage: fileUrl });
+      toast({
+        title: `${file.name} uploaded`,
+        description: "Cover image file selected successfully",
+>>>>>>> 9508366 (Update contract calls)
       });
     }
   };
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
       genres: data.genres.filter(g => g !== genre)
@@ -148,6 +182,8 @@ const StoryDetailsStep = ({
 >>>>>>> e9eef45 (Implement story creation enhancements)
 =======
 >>>>>>> aae9368 (Update image upload functionality)
+=======
+>>>>>>> 9508366 (Update contract calls)
   return (
     <Card className="p-8">
       <div className="flex items-center space-x-3 mb-6">
@@ -244,6 +280,9 @@ const StoryDetailsStep = ({
         <div className="space-y-2">
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9508366 (Update contract calls)
           <Label htmlFor="coverImage">Cover Image URL or Upload</Label>
           <div className="flex gap-3">
             <Input
@@ -257,6 +296,7 @@ const StoryDetailsStep = ({
               aria-invalid={!!errors.coverImage}
             />
 <<<<<<< HEAD
+<<<<<<< HEAD
             <Button
               type="button"
               variant="outline"
@@ -267,6 +307,9 @@ const StoryDetailsStep = ({
 =======
             <Button type="button" variant="outline" onClick={handleUploadClick}>
 >>>>>>> aae9368 (Update image upload functionality)
+=======
+            <Button type="button" variant="outline" onClick={handleUploadClick}>
+>>>>>>> 9508366 (Update contract calls)
               <Upload className="h-4 w-4 mr-2" />
               Upload
             </Button>

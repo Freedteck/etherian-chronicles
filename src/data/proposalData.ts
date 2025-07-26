@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { mapChapterDetails, mapStoryDetails } from "@/lib/mappers";
 import { contract, getIpfsDetails } from "@/lib/utils";
-import { readContract } from "thirdweb";
+import { prepareContractCall, readContract, sendTransaction } from "thirdweb";
 
 const totalStories = async () => {
   const totalStories = await readContract({
@@ -70,4 +71,76 @@ export const getActiveProposals = async () => {
     await getStories();
   const activeProposals = proposals.filter((proposal) => proposal.status === 0);
   return { activeProposals, isProposalLoading };
+};
+
+export const getUserProposalVote = async (storyId, voter) => {
+  if (!voter) return 0;
+  try {
+    const hasVoted = await readContract({
+      contract: contract,
+      method: "getUserProposalVote",
+      params: [BigInt(storyId), voter],
+    });
+    return hasVoted;
+  } catch (error) {
+    console.error("Error checking if user has voted:", error);
+    throw error;
+  }
+};
+
+// Write Functions
+
+const executeTransaction = async (method: any, params: any[], account: any) => {
+  try {
+    // Prepare the contract call
+    const transaction = prepareContractCall({
+      contract,
+      method: method,
+      params: params,
+    });
+
+    // Send the transaction
+    const { transactionHash } = await sendTransaction({
+      account, // the account sending the transaction
+      transaction, // the prepared transaction
+    });
+    console.log(`Transaction successful: ${transactionHash}`);
+    return transactionHash;
+  } catch (error) {
+    console.error(`Error executing ${method}:`, error);
+    throw error;
+  }
+};
+
+export const createStory = async (storyData: any, account: any) => {
+  const storyDataValues = Object.values(storyData);
+  try {
+    const transactionHash = await executeTransaction(
+      "createStoryProposal",
+      storyDataValues,
+      account
+    );
+    return transactionHash;
+  } catch (error) {
+    console.error("Error creating story:", error);
+    throw error;
+  }
+};
+
+export const voteOnProposal = async (
+  storyId: number,
+  voteType: 1 | 2, // 1 for Yes, 2 for No
+  account: any
+) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "voteOnProposal",
+      [BigInt(storyId), voteType],
+      account
+    );
+    return transactionHash;
+  } catch (error) {
+    console.error("Error voting on proposal:", error);
+    throw error;
+  }
 };

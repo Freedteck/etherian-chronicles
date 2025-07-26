@@ -12,6 +12,7 @@ import StoryDetailsStep from "./StoryDetailsStep";
 import ChapterContentStep from "./ChapterContentStep";
 import CollaboratorsStep from "./CollaboratorsStep";
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +26,11 @@ import CollaboratorsStep from './CollaboratorsStep';
 >>>>>>> e9eef45 (Implement story creation enhancements)
 =======
 >>>>>>> d82711f (Update contract call)
+=======
+import { uploadJsonToPinata } from "@/lib/pinata";
+import { createStory } from "@/data/proposalData";
+import { useActiveAccount } from "thirdweb/react";
+>>>>>>> 9508366 (Update contract calls)
 
 interface VotingOption {
   id: string;
@@ -33,7 +39,7 @@ interface VotingOption {
 
 interface Collaborator {
   id: string;
-  username: string;
+  address: string;
   email: string;
 }
 
@@ -86,6 +92,7 @@ const steps = [
 ];
 
 const CreateStoryForm = () => {
+  const account = useActiveAccount();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
@@ -259,16 +266,16 @@ const CreateStoryForm = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log("Submitting story with data:", formData);
 
     if (validateStep(currentStep)) {
       toast({
-        title: "Story Created!",
-        description:
-          "Your story has been submitted and is now live for community interaction.",
+        title: "Creating story...",
+        description: "Your story is being created. Please wait.",
       });
 
+<<<<<<< HEAD
       navigate("/stories");
 =======
     setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -294,6 +301,41 @@ const CreateStoryForm = () => {
 
       navigate("/stories");
 >>>>>>> d82711f (Update contract call)
+=======
+      const firstChapter = {
+        title: formData.chapterTitle,
+        content: formData.firstChapter,
+        votingOptions: formData.votingOptions,
+        genres: formData.genres,
+      };
+
+      const firstChapterIpfsUrl = await uploadJsonToPinata(firstChapter);
+      const storyData = {
+        _title: formData.title,
+        _summary: formData.summary,
+        _ipfsHashImage: formData.coverImage,
+        _ipfsHashChapter1Content: firstChapterIpfsUrl,
+        _chapter1Choices: formData.votingOptions,
+        _collaborators: formData.collaborators.map((c) => c.address),
+      };
+      if (!firstChapterIpfsUrl) {
+        toast({
+          variant: "destructive",
+          title: "Error uploading first chapter",
+          description: "Please try again later.",
+        });
+        return;
+      } else {
+        const transactionHash = await createStory(storyData, account);
+        if (transactionHash) {
+          toast({
+            title: "Story created successfully",
+            description: "Your story has been created.",
+          });
+          navigate("/stories");
+        }
+      }
+>>>>>>> 9508366 (Update contract calls)
     }
   };
 

@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { Crown, ThumbsUp, ThumbsDown, Clock, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatAddress } from "@/lib/utils";
+import { formatAddress, getTimeAgo, getTimeRemaining } from "@/lib/utils";
 
 const ProposalCard = ({ proposal, className = "" }) => {
-  const totalVotes = proposal.proposalYesVote + proposal.proposalNoVote;
+  const totalVotes = proposal.proposalYesVotes + proposal.proposalNoVotes;
   const approvalPercentage =
-    totalVotes > 0 ? (proposal.proposalYesVote / totalVotes) * 100 : 0;
+    totalVotes > 0 ? (proposal.proposalYesVotes / totalVotes) * 100 : 0;
   const daysLeft = Math.ceil(
     (new Date(proposal.proposalVoteEndTime).getTime() - new Date().getTime()) /
       (1000 * 60 * 60 * 24)
@@ -45,7 +45,7 @@ const ProposalCard = ({ proposal, className = "" }) => {
               className="bg-background/90 text-foreground border-border/50"
             >
               <Clock className="h-3 w-3 mr-1" />
-              {daysLeft > 0 ? `${daysLeft}d left` : "Ending soon"}
+              {getTimeRemaining(proposal.proposalVoteEndTime)}
             </Badge>
           </div>
         )}
@@ -63,9 +63,7 @@ const ProposalCard = ({ proposal, className = "" }) => {
             <span>by {formatAddress(proposal.writer)}</span>
             <span>•</span>
             <Calendar className="h-3 w-3" />
-            <span>
-              {new Date(proposal.proposalVoteEndTime).toLocaleDateString()}
-            </span>
+            <span>{getTimeAgo(proposal.createdAt)}</span>
           </div>
         </div>
 
@@ -76,14 +74,14 @@ const ProposalCard = ({ proposal, className = "" }) => {
 
         {/* Genre Tags */}
         <div className="flex flex-wrap gap-1 mb-4">
-          {proposal.chapters[0].tags.slice(0, 2).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
+          {proposal.chapters[0].genres.slice(0, 2).map((genre) => (
+            <Badge key={genre} variant="outline" className="text-xs">
+              {genre}
             </Badge>
           ))}
-          {proposal.chapters[0].tags.length > 2 && (
+          {proposal.chapters[0].genres.length > 2 && (
             <Badge variant="outline" className="text-xs">
-              +{proposal.chapters[0].tags.length - 2}
+              +{proposal.chapters[0].genres.length - 2}
             </Badge>
           )}
         </div>
