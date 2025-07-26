@@ -25,12 +25,16 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { useRef } from 'react';
 >>>>>>> aae9368 (Update image upload functionality)
 =======
 >>>>>>> e9eef45 (Implement story creation enhancements)
 =======
 >>>>>>> d82711f (Update contract call)
+=======
+import { useRef } from 'react';
+>>>>>>> aae9368 (Update image upload functionality)
 
 interface StoryDetailsStepProps {
   data: {
@@ -74,6 +78,7 @@ const StoryDetailsStep = ({
 }: StoryDetailsStepProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+<<<<<<< HEAD
 =======
   'Fantasy', 'Adventure', 'Steampunk', 'Political', 'Revolution', 
   'Technology', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy'
@@ -88,6 +93,8 @@ const StoryDetailsStep = ({
 }: StoryDetailsStepProps) => {
   const { toast } = useToast();
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+>>>>>>> aae9368 (Update image upload functionality)
 
   const handleGenreAdd = (genre: string) => {
     if (genre && !data.genres.includes(genre) && data.genres.length < 5) {
@@ -129,6 +136,7 @@ const StoryDetailsStep = ({
     }
   };
 
+<<<<<<< HEAD
 =======
       genres: data.genres.filter(g => g !== genre)
 =======
@@ -138,6 +146,8 @@ const StoryDetailsStep = ({
   };
 
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+>>>>>>> aae9368 (Update image upload functionality)
   return (
     <Card className="p-8">
       <div className="flex items-center space-x-3 mb-6">
@@ -233,6 +243,7 @@ const StoryDetailsStep = ({
         {/* Cover Image */}
         <div className="space-y-2">
 <<<<<<< HEAD
+<<<<<<< HEAD
           <Label htmlFor="coverImage">Cover Image URL or Upload</Label>
           <div className="flex gap-3">
             <Input
@@ -274,10 +285,13 @@ const StoryDetailsStep = ({
                 src={data.coverImage}
 =======
           <Label htmlFor="coverImage">Cover Image URL</Label>
+=======
+          <Label htmlFor="coverImage">Cover Image URL or Upload</Label>
+>>>>>>> aae9368 (Update image upload functionality)
           <div className="flex gap-3">
             <Input
               id="coverImage"
-              placeholder="https://..."
+              placeholder="https://... or upload a file"
               value={data.coverImage}
               onChange={(e) => onUpdate({ coverImage: e.target.value })}
               aria-describedby={
@@ -285,6 +299,7 @@ const StoryDetailsStep = ({
               }
               aria-invalid={!!errors.coverImage}
             />
+<<<<<<< HEAD
             <Button
               type="button"
               variant="outline"
@@ -292,9 +307,20 @@ const StoryDetailsStep = ({
                 toast({ title: "Upload functionality coming soon!" })
               }
             >
+=======
+            <Button type="button" variant="outline" onClick={handleUploadClick}>
+>>>>>>> aae9368 (Update image upload functionality)
               <Upload className="h-4 w-4 mr-2" />
               Upload
             </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+              aria-hidden="true"
+            />
           </div>
           {data.coverImage && (
             <div className="mt-3">
