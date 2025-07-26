@@ -1,22 +1,19 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Book, Crown, Users, Scroll, Menu, X, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Book, Crown, Users, Scroll, Menu, X, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
+import { client, wallets } from "@/lib/utils";
+import { etherlinkTestnet } from "thirdweb/chains";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
+  const account = useActiveAccount();
 
   const navigation = [
-    { name: 'Stories', href: '/stories', icon: Book },
-    { name: 'Proposals', href: '/proposals', icon: Scroll },
-    { name: 'Community', href: '/community', icon: Users }
+    { name: "Stories", href: "/stories", icon: Book },
+    { name: "Proposals", href: "/proposals", icon: Scroll },
+    { name: "Community", href: "/community", icon: Users },
   ];
 
   return (
@@ -53,41 +50,40 @@ const Header = () => {
                 </Link>
               );
             })}
+            {account && (
+              <Link
+                to="/profile"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
+              >
+                <Crown className="h-4 w-4" />
+                <span className="font-medium">Profile</span>
+              </Link>
+            )}
           </nav>
 
           {/* Connect Button */}
           <div className="hidden md:flex items-center space-x-4">
-            {!isConnected ? (
-              <Button 
-                className="btn-mystical"
-                onClick={() => setIsConnected(true)}
-              >
-                Connect
-              </Button>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="btn-mystical">
-                    Connected
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-card border border-border shadow-xl">
-                  <DropdownMenuItem asChild className="hover:bg-accent/20 focus:bg-accent/20 transition-colors border-b border-border/30 last:border-b-0">
-                    <Link to="/profile" className="flex items-center px-3 py-2.5">
-                      <Crown className="h-4 w-4 mr-2" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="hover:bg-accent/20 focus:bg-accent/20 transition-colors border-b border-border/30 last:border-b-0">
-                    <Link to="/create" className="flex items-center px-3 py-2.5">
-                      <Scroll className="h-4 w-4 mr-2" />
-                      Create Story
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            <ConnectButton
+              client={client}
+              wallets={wallets}
+              accountAbstraction={{
+                chain: etherlinkTestnet, // replace with the chain you want
+                sponsorGas: true,
+              }}
+              connectModal={{ size: "compact" }}
+              theme={darkTheme({
+                colors: {
+                  secondaryIconHoverColor: "hsl(240, 6%, 94%)",
+                  secondaryIconColor: "hsl(251, 4%, 50%)",
+                  connectedButtonBg: "hsl(217.2 32.6% 17.5%)",
+                  connectedButtonBgHover: "hsl(231, 11%, 12%)",
+                  accentButtonText: "hsl(240, 7%, 94%)",
+                  modalBg: "hsl(228, 12%, 8%)",
+                  primaryButtonBg: "hsl(270, 60%, 45%)",
+                  primaryButtonText: "hsl(0, 0%, 100%)",
+                },
+              })}
+            />
           </div>
 
           {/* Mobile menu button */}
@@ -98,7 +94,11 @@ const Header = () => {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2"
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>

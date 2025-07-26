@@ -40,6 +40,8 @@ export declare namespace EtherianChronicle {
 export interface EtherianChronicleInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "CHAPTER_VOTING_PERIOD"
+      | "PROPOSAL_VOTING_PERIOD"
       | "addChapter"
       | "addCollaborator"
       | "approve"
@@ -52,6 +54,11 @@ export interface EtherianChronicleInterface extends Interface {
       | "getProposalVoteCounts"
       | "getStoryCollaborators"
       | "getTotalStories"
+<<<<<<< HEAD:etherian-chronicles-frontend/src/typechain-types/EtherianChronicle.ts
+=======
+      | "getUserProposalVote"
+      | "getVotingPeriods"
+>>>>>>> d82711f (Update contract call):src/typechain-types/EtherianChronicle.ts
       | "hasVotedOnChapter"
       | "hasVotedOnProposal"
       | "isApprovedForAll"
@@ -96,15 +103,16 @@ export interface EtherianChronicleInterface extends Interface {
   ): EventFragment;
 
   encodeFunctionData(
+    functionFragment: "CHAPTER_VOTING_PERIOD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "PROPOSAL_VOTING_PERIOD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "addChapter",
-    values: [
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      string,
-      string[],
-      BigNumberish
-    ]
+    values: [BigNumberish, BigNumberish, BigNumberish, string, string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "addCollaborator",
@@ -124,15 +132,7 @@ export interface EtherianChronicleInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createStoryProposal",
-    values: [
-      string,
-      string,
-      string,
-      string,
-      string[],
-      AddressLike[],
-      BigNumberish
-    ]
+    values: [string, string, string, string, string[], AddressLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
@@ -159,6 +159,17 @@ export interface EtherianChronicleInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+<<<<<<< HEAD:etherian-chronicles-frontend/src/typechain-types/EtherianChronicle.ts
+=======
+    functionFragment: "getUserProposalVote",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getVotingPeriods",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+>>>>>>> d82711f (Update contract call):src/typechain-types/EtherianChronicle.ts
     functionFragment: "hasVotedOnChapter",
     values: [BigNumberish, BigNumberish, AddressLike]
   ): string;
@@ -238,6 +249,14 @@ export interface EtherianChronicleInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "CHAPTER_VOTING_PERIOD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "PROPOSAL_VOTING_PERIOD",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "addChapter", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "addCollaborator",
@@ -275,6 +294,17 @@ export interface EtherianChronicleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+<<<<<<< HEAD:etherian-chronicles-frontend/src/typechain-types/EtherianChronicle.ts
+=======
+    functionFragment: "getUserProposalVote",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getVotingPeriods",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+>>>>>>> d82711f (Update contract call):src/typechain-types/EtherianChronicle.ts
     functionFragment: "hasVotedOnChapter",
     data: BytesLike
   ): Result;
@@ -671,14 +701,17 @@ export interface EtherianChronicle extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  CHAPTER_VOTING_PERIOD: TypedContractMethod<[], [bigint], "view">;
+
+  PROPOSAL_VOTING_PERIOD: TypedContractMethod<[], [bigint], "view">;
+
   addChapter: TypedContractMethod<
     [
       _storyId: BigNumberish,
       _previousChapterIndex: BigNumberish,
       _previousChapterWinningChoiceIndex: BigNumberish,
       _ipfsHash: string,
-      _choices: string[],
-      _voteDuration: BigNumberish
+      _choices: string[]
     ],
     [void],
     "nonpayable"
@@ -711,8 +744,7 @@ export interface EtherianChronicle extends BaseContract {
       _ipfsHashImage: string,
       _ipfsHashChapter1Content: string,
       _chapter1Choices: string[],
-      _collaborators: AddressLike[],
-      _proposalVoteDuration: BigNumberish
+      _collaborators: AddressLike[]
     ],
     [void],
     "nonpayable"
@@ -729,12 +761,14 @@ export interface EtherianChronicle extends BaseContract {
         EtherianChronicle.ChoiceStructOutput[],
         bigint,
         bigint,
+        bigint,
         boolean,
         bigint
       ] & {
         chapterId: bigint;
         ipfsHash: string;
         choices: EtherianChronicle.ChoiceStructOutput[];
+        createdAt: bigint;
         voteEndTime: bigint;
         winningChoiceIndex: bigint;
         isResolved: boolean;
@@ -744,6 +778,32 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
 
+<<<<<<< HEAD:etherian-chronicles-frontend/src/typechain-types/EtherianChronicle.ts
+=======
+  getChapterBasicInfo: TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
+    [
+      [bigint, string, bigint, bigint, bigint, boolean, bigint, bigint] & {
+        chapterId: bigint;
+        ipfsHash: string;
+        createdAt: bigint;
+        voteEndTime: bigint;
+        winningChoiceIndex: bigint;
+        isResolved: boolean;
+        voteCountSum: bigint;
+        totalChoices: bigint;
+      }
+    ],
+    "view"
+  >;
+
+  getChapterChoices: TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
+    [EtherianChronicle.ChoiceStructOutput[]],
+    "view"
+  >;
+
+>>>>>>> d82711f (Update contract call):src/typechain-types/EtherianChronicle.ts
   getCurrentChapterIndex: TypedContractMethod<
     [_storyId: BigNumberish],
     [bigint],
@@ -762,8 +822,73 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
 
+<<<<<<< HEAD:etherian-chronicles-frontend/src/typechain-types/EtherianChronicle.ts
   getTotalStories: TypedContractMethod<[], [bigint], "view">;
 
+=======
+  getStoryDetails: TypedContractMethod<
+    [_storyId: BigNumberish],
+    [
+      [
+        bigint,
+        string,
+        string,
+        string,
+        string,
+        string[],
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint
+      ] & {
+        storyId: bigint;
+        writer: string;
+        title: string;
+        summary: string;
+        ipfsHashImage: string;
+        collaborators: string[];
+        status: bigint;
+        createdAt: bigint;
+        proposalVoteEndTime: bigint;
+        proposalYesVotes: bigint;
+        proposalNoVotes: bigint;
+        currentChapterIndex: bigint;
+        totalChapters: bigint;
+      }
+    ],
+    "view"
+  >;
+
+  getStoryStatus: TypedContractMethod<
+    [_storyId: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
+  getTotalChapters: TypedContractMethod<
+    [_storyId: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
+  getTotalStories: TypedContractMethod<[], [bigint], "view">;
+
+  getUserProposalVote: TypedContractMethod<
+    [_storyId: BigNumberish, _voter: AddressLike],
+    [bigint],
+    "view"
+  >;
+
+  getVotingPeriods: TypedContractMethod<
+    [],
+    [[bigint, bigint] & { proposalPeriod: bigint; chapterPeriod: bigint }],
+    "view"
+  >;
+
+>>>>>>> d82711f (Update contract call):src/typechain-types/EtherianChronicle.ts
   hasVotedOnChapter: TypedContractMethod<
     [_storyId: BigNumberish, _chapterIndex: BigNumberish, _voter: AddressLike],
     [boolean],
@@ -849,6 +974,7 @@ export interface EtherianChronicle extends BaseContract {
         bigint,
         bigint,
         bigint,
+        bigint,
         bigint
       ] & {
         storyId: bigint;
@@ -857,6 +983,7 @@ export interface EtherianChronicle extends BaseContract {
         summary: string;
         ipfsHashImage: string;
         status: bigint;
+        createdAt: bigint;
         proposalVoteEndTime: bigint;
         proposalYesVotes: bigint;
         proposalNoVotes: bigint;
@@ -915,6 +1042,12 @@ export interface EtherianChronicle extends BaseContract {
   ): T;
 
   getFunction(
+    nameOrSignature: "CHAPTER_VOTING_PERIOD"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "PROPOSAL_VOTING_PERIOD"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "addChapter"
   ): TypedContractMethod<
     [
@@ -922,8 +1055,7 @@ export interface EtherianChronicle extends BaseContract {
       _previousChapterIndex: BigNumberish,
       _previousChapterWinningChoiceIndex: BigNumberish,
       _ipfsHash: string,
-      _choices: string[],
-      _voteDuration: BigNumberish
+      _choices: string[]
     ],
     [void],
     "nonpayable"
@@ -961,8 +1093,7 @@ export interface EtherianChronicle extends BaseContract {
       _ipfsHashImage: string,
       _ipfsHashChapter1Content: string,
       _chapter1Choices: string[],
-      _collaborators: AddressLike[],
-      _proposalVoteDuration: BigNumberish
+      _collaborators: AddressLike[]
     ],
     [void],
     "nonpayable"
@@ -981,12 +1112,14 @@ export interface EtherianChronicle extends BaseContract {
         EtherianChronicle.ChoiceStructOutput[],
         bigint,
         bigint,
+        bigint,
         boolean,
         bigint
       ] & {
         chapterId: bigint;
         ipfsHash: string;
         choices: EtherianChronicle.ChoiceStructOutput[];
+        createdAt: bigint;
         voteEndTime: bigint;
         winningChoiceIndex: bigint;
         isResolved: boolean;
@@ -996,6 +1129,34 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
   getFunction(
+<<<<<<< HEAD:etherian-chronicles-frontend/src/typechain-types/EtherianChronicle.ts
+=======
+    nameOrSignature: "getChapterBasicInfo"
+  ): TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
+    [
+      [bigint, string, bigint, bigint, bigint, boolean, bigint, bigint] & {
+        chapterId: bigint;
+        ipfsHash: string;
+        createdAt: bigint;
+        voteEndTime: bigint;
+        winningChoiceIndex: bigint;
+        isResolved: boolean;
+        voteCountSum: bigint;
+        totalChoices: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getChapterChoices"
+  ): TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
+    [EtherianChronicle.ChoiceStructOutput[]],
+    "view"
+  >;
+  getFunction(
+>>>>>>> d82711f (Update contract call):src/typechain-types/EtherianChronicle.ts
     nameOrSignature: "getCurrentChapterIndex"
   ): TypedContractMethod<[_storyId: BigNumberish], [bigint], "view">;
   getFunction(
@@ -1009,9 +1170,72 @@ export interface EtherianChronicle extends BaseContract {
     nameOrSignature: "getStoryCollaborators"
   ): TypedContractMethod<[_storyId: BigNumberish], [string[]], "view">;
   getFunction(
+<<<<<<< HEAD:etherian-chronicles-frontend/src/typechain-types/EtherianChronicle.ts
     nameOrSignature: "getTotalStories"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+=======
+    nameOrSignature: "getStoryDetails"
+  ): TypedContractMethod<
+    [_storyId: BigNumberish],
+    [
+      [
+        bigint,
+        string,
+        string,
+        string,
+        string,
+        string[],
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint
+      ] & {
+        storyId: bigint;
+        writer: string;
+        title: string;
+        summary: string;
+        ipfsHashImage: string;
+        collaborators: string[];
+        status: bigint;
+        createdAt: bigint;
+        proposalVoteEndTime: bigint;
+        proposalYesVotes: bigint;
+        proposalNoVotes: bigint;
+        currentChapterIndex: bigint;
+        totalChapters: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getStoryStatus"
+  ): TypedContractMethod<[_storyId: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getTotalChapters"
+  ): TypedContractMethod<[_storyId: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getTotalStories"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getUserProposalVote"
+  ): TypedContractMethod<
+    [_storyId: BigNumberish, _voter: AddressLike],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getVotingPeriods"
+  ): TypedContractMethod<
+    [],
+    [[bigint, bigint] & { proposalPeriod: bigint; chapterPeriod: bigint }],
+    "view"
+  >;
+  getFunction(
+>>>>>>> d82711f (Update contract call):src/typechain-types/EtherianChronicle.ts
     nameOrSignature: "hasVotedOnChapter"
   ): TypedContractMethod<
     [_storyId: BigNumberish, _chapterIndex: BigNumberish, _voter: AddressLike],
@@ -1107,6 +1331,7 @@ export interface EtherianChronicle extends BaseContract {
         bigint,
         bigint,
         bigint,
+        bigint,
         bigint
       ] & {
         storyId: bigint;
@@ -1115,6 +1340,7 @@ export interface EtherianChronicle extends BaseContract {
         summary: string;
         ipfsHashImage: string;
         status: bigint;
+        createdAt: bigint;
         proposalVoteEndTime: bigint;
         proposalYesVotes: bigint;
         proposalNoVotes: bigint;
