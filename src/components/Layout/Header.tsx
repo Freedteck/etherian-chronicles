@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Book, Crown, Users, Scroll, Menu, X, ChevronDown } from "lucide-react";
@@ -9,6 +10,22 @@ import { etherlinkTestnet } from "thirdweb/chains";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const account = useActiveAccount();
+=======
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Book, Crown, Users, Scroll, Menu, X, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+>>>>>>> 62d9e3c (Update header with connect button)
 
   const navigation = [
     { name: "Stories", href: "/stories", icon: Book },
@@ -63,6 +80,7 @@ const Header = () => {
 
           {/* Connect Button */}
           <div className="hidden md:flex items-center space-x-4">
+<<<<<<< HEAD
             <ConnectButton
               client={client}
               wallets={wallets}
@@ -84,6 +102,39 @@ const Header = () => {
                 },
               })}
             />
+=======
+            {!isConnected ? (
+              <Button 
+                className="btn-mystical"
+                onClick={() => setIsConnected(true)}
+              >
+                Connect
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="btn-mystical">
+                    Connected
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center">
+                      <Crown className="h-4 w-4 mr-2" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/create" className="flex items-center">
+                      <Scroll className="h-4 w-4 mr-2" />
+                      Create Story
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+>>>>>>> 62d9e3c (Update header with connect button)
           </div>
 
           {/* Mobile menu button */}
