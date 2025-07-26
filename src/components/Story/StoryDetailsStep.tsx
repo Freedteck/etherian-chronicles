@@ -1,5 +1,8 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d82711f (Update contract call)
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FileText, Upload, Tag, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> e9eef45 (Implement story creation enhancements)
@@ -25,6 +29,8 @@ import { useRef } from 'react';
 >>>>>>> aae9368 (Update image upload functionality)
 =======
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+>>>>>>> d82711f (Update contract call)
 
 interface StoryDetailsStepProps {
   data: {
@@ -44,6 +50,9 @@ interface StoryDetailsStepProps {
 
 const availableGenres = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d82711f (Update contract call)
   "Fantasy",
   "Adventure",
   "Steampunk",
@@ -55,6 +64,7 @@ const availableGenres = [
   "Sci-Fi",
   "Horror",
   "Comedy",
+<<<<<<< HEAD
 ];
 
 const StoryDetailsStep = ({
@@ -67,9 +77,15 @@ const StoryDetailsStep = ({
 =======
   'Fantasy', 'Adventure', 'Steampunk', 'Political', 'Revolution', 
   'Technology', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy'
+=======
+>>>>>>> d82711f (Update contract call)
 ];
 
-const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => {
+const StoryDetailsStep = ({
+  data,
+  errors,
+  onUpdate,
+}: StoryDetailsStepProps) => {
   const { toast } = useToast();
 >>>>>>> e9eef45 (Implement story creation enhancements)
 
@@ -77,16 +93,21 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
     if (genre && !data.genres.includes(genre) && data.genres.length < 5) {
       onUpdate({
 <<<<<<< HEAD
+<<<<<<< HEAD
         genres: [...data.genres, genre],
 =======
         genres: [...data.genres, genre]
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+        genres: [...data.genres, genre],
+>>>>>>> d82711f (Update contract call)
       });
     }
   };
 
   const handleGenreRemove = (genre: string) => {
     onUpdate({
+<<<<<<< HEAD
 <<<<<<< HEAD
       genres: data.genres.filter((g) => g !== genre),
     });
@@ -110,6 +131,9 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
 
 =======
       genres: data.genres.filter(g => g !== genre)
+=======
+      genres: data.genres.filter((g) => g !== genre),
+>>>>>>> d82711f (Update contract call)
     });
   };
 
@@ -123,10 +147,14 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
         <h2 className="text-xl font-display font-bold">Story Details</h2>
       </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
       
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+
+>>>>>>> d82711f (Update contract call)
       <div className="space-y-6">
         {/* Title */}
         <div className="space-y-2">
@@ -142,12 +170,18 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
           />
           {errors.title && (
 <<<<<<< HEAD
+<<<<<<< HEAD
             <p id="title-error" className="text-sm text-destructive">
               {errors.title}
             </p>
 =======
             <p id="title-error" className="text-sm text-destructive">{errors.title}</p>
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+            <p id="title-error" className="text-sm text-destructive">
+              {errors.title}
+            </p>
+>>>>>>> d82711f (Update contract call)
           )}
         </div>
 
@@ -162,12 +196,18 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
             value={data.summary}
             onChange={(e) => onUpdate({ summary: e.target.value })}
 <<<<<<< HEAD
+<<<<<<< HEAD
             aria-describedby={`summary-count ${
               errors.summary ? "summary-error" : ""
             }`.trim()}
 =======
             aria-describedby={`summary-count ${errors.summary ? "summary-error" : ""}`.trim()}
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+            aria-describedby={`summary-count ${
+              errors.summary ? "summary-error" : ""
+            }`.trim()}
+>>>>>>> d82711f (Update contract call)
             aria-invalid={!!errors.summary}
           />
           <p id="summary-count" className="text-sm text-muted-foreground">
@@ -175,12 +215,18 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
           </p>
           {errors.summary && (
 <<<<<<< HEAD
+<<<<<<< HEAD
             <p id="summary-error" className="text-sm text-destructive">
               {errors.summary}
             </p>
 =======
             <p id="summary-error" className="text-sm text-destructive">{errors.summary}</p>
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+            <p id="summary-error" className="text-sm text-destructive">
+              {errors.summary}
+            </p>
+>>>>>>> d82711f (Update contract call)
           )}
         </div>
 
@@ -234,19 +280,32 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
               placeholder="https://..."
               value={data.coverImage}
               onChange={(e) => onUpdate({ coverImage: e.target.value })}
-              aria-describedby={errors.coverImage ? "coverImage-error" : undefined}
+              aria-describedby={
+                errors.coverImage ? "coverImage-error" : undefined
+              }
               aria-invalid={!!errors.coverImage}
             />
-            <Button type="button" variant="outline" onClick={() => toast({ title: "Upload functionality coming soon!" })}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                toast({ title: "Upload functionality coming soon!" })
+              }
+            >
               <Upload className="h-4 w-4 mr-2" />
               Upload
             </Button>
           </div>
           {data.coverImage && (
             <div className="mt-3">
+<<<<<<< HEAD
               <img 
                 src={data.coverImage} 
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+              <img
+                src={data.coverImage}
+>>>>>>> d82711f (Update contract call)
                 alt="Cover preview"
                 className="w-32 h-48 object-cover rounded-lg border border-border"
               />
@@ -254,18 +313,25 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
           )}
           {errors.coverImage && (
 <<<<<<< HEAD
+<<<<<<< HEAD
             <p id="coverImage-error" className="text-sm text-destructive">
               {errors.coverImage}
             </p>
 =======
             <p id="coverImage-error" className="text-sm text-destructive">{errors.coverImage}</p>
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+            <p id="coverImage-error" className="text-sm text-destructive">
+              {errors.coverImage}
+            </p>
+>>>>>>> d82711f (Update contract call)
           )}
         </div>
 
         {/* Genres */}
         <div className="space-y-2">
           <Label>Genres * (1-5 genres)</Label>
+<<<<<<< HEAD
 <<<<<<< HEAD
 
           {/* Available Genres */}
@@ -291,24 +357,35 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
 
 =======
           
+=======
+
+>>>>>>> d82711f (Update contract call)
           {/* Available Genres */}
           <div className="flex flex-wrap gap-2 mb-3">
-            <span className="text-sm text-muted-foreground w-full mb-2">Click to add genres:</span>
-            {availableGenres.filter(g => !data.genres.includes(g)).map((genre) => (
-              <button
-                key={genre}
-                type="button"
-                onClick={() => handleGenreAdd(genre)}
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
-                disabled={data.genres.length >= 5}
-              >
-                <Tag className="h-3 w-3 mr-1" />
-                {genre}
-              </button>
-            ))}
+            <span className="text-sm text-muted-foreground w-full mb-2">
+              Click to add genres:
+            </span>
+            {availableGenres
+              .filter((g) => !data.genres.includes(g))
+              .map((genre) => (
+                <button
+                  key={genre}
+                  type="button"
+                  onClick={() => handleGenreAdd(genre)}
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                  disabled={data.genres.length >= 5}
+                >
+                  <Tag className="h-3 w-3 mr-1" />
+                  {genre}
+                </button>
+              ))}
           </div>
+<<<<<<< HEAD
           
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+
+>>>>>>> d82711f (Update contract call)
           {/* Selected Genres */}
           <div className="flex flex-wrap gap-2">
             {data.genres.map((genre) => (
@@ -335,7 +412,11 @@ const StoryDetailsStep = ({ data, errors, onUpdate }: StoryDetailsStepProps) => 
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 export default StoryDetailsStep;
 =======
 export default StoryDetailsStep;
 >>>>>>> e9eef45 (Implement story creation enhancements)
+=======
+export default StoryDetailsStep;
+>>>>>>> d82711f (Update contract call)

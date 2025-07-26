@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d82711f (Update contract call)
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Book, Crown, Users, Scroll, Menu, X, ChevronDown } from "lucide-react";
@@ -6,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
 import { client, wallets } from "@/lib/utils";
 import { etherlinkTestnet } from "thirdweb/chains";
+<<<<<<< HEAD
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,6 +41,17 @@ const Header = () => {
     { name: 'Proposals', href: '/proposals', icon: Scroll },
     { name: 'Community', href: '/community', icon: Users }
 >>>>>>> 7a4acb1 (Refactor Header and Menu Styling)
+=======
+
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const account = useActiveAccount();
+
+  const navigation = [
+    { name: "Stories", href: "/stories", icon: Book },
+    { name: "Proposals", href: "/proposals", icon: Scroll },
+    { name: "Community", href: "/community", icon: Users },
+>>>>>>> d82711f (Update contract call)
   ];
 
   return (
@@ -87,6 +102,9 @@ const Header = () => {
           {/* Connect Button */}
           <div className="hidden md:flex items-center space-x-4">
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d82711f (Update contract call)
             <ConnectButton
               client={client}
               wallets={wallets}
@@ -108,6 +126,7 @@ const Header = () => {
                 },
               })}
             />
+<<<<<<< HEAD
 =======
             {!isConnected ? (
               <Button 
@@ -141,6 +160,8 @@ const Header = () => {
               </DropdownMenu>
             )}
 >>>>>>> 62d9e3c (Update header with connect button)
+=======
+>>>>>>> d82711f (Update contract call)
           </div>
 
           {/* Mobile menu button */}
