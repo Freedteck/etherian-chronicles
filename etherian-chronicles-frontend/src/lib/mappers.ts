@@ -3,14 +3,14 @@
 
 export interface Choice {
   text: string;
-  voteCount: number;
-  nextChapterIndex: number;
+  voteCount: any;
+  nextChapterIndex: any;
 }
 
 export interface ChapterDetails {
   chapterId: number;
   ipfsHash: string;
-  choices: Choice[];
+  choices: any[];
   createdAt: number;
   voteEndTime: number;
   winningChoiceIndex: number;
@@ -88,21 +88,23 @@ export interface Story {
 
 // Mapping functions
 export const mapChoice = (rawChoice: any): Choice => ({
-  text: rawChoice[0],
-  voteCount: Number(rawChoice[1]),
-  nextChapterIndex: Number(rawChoice[2]),
+  text: rawChoice?.text?.toString(),
+  voteCount: Number(rawChoice.voteCount),
+  nextChapterIndex: Number(rawChoice.nextChapterIndex),
 });
 
-export const mapChapterDetails = (rawChapter: any): ChapterDetails => ({
-  chapterId: Number(rawChapter[0]),
-  ipfsHash: rawChapter[1],
-  choices: rawChapter[2].map(mapChoice),
-  createdAt: Number(rawChapter[3]),
-  voteEndTime: Number(rawChapter[4]),
-  winningChoiceIndex: Number(rawChapter[5]),
-  isResolved: rawChapter[6],
-  voteCountSum: Number(rawChapter[7]),
-});
+export const mapChapterDetails = (rawChapter: any): ChapterDetails => {
+  return {
+    chapterId: Number(rawChapter[0]),
+    ipfsHash: rawChapter[1],
+    choices: rawChapter[2].map(mapChoice),
+    createdAt: Number(rawChapter[3]),
+    voteEndTime: Number(rawChapter[4]),
+    winningChoiceIndex: Number(rawChapter[5]),
+    isResolved: rawChapter[6],
+    voteCountSum: Number(rawChapter[7]),
+  };
+};
 
 export const mapChapterBasicInfo = (rawChapter: any): ChapterBasicInfo => ({
   chapterId: Number(rawChapter[0]),

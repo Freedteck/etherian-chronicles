@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { mapChapterDetails, mapStoryDetails } from "@/lib/mappers";
 import { contract, getIpfsDetails } from "@/lib/utils";
-import { prepareContractCall, readContract, sendTransaction } from "thirdweb";
+import {
+  getContractEvents,
+  prepareContractCall,
+  prepareEvent,
+  readContract,
+  sendTransaction,
+} from "thirdweb";
 
 const totalStories = async () => {
   const totalStories = await readContract({
@@ -143,4 +149,75 @@ export const voteOnProposal = async (
     console.error("Error voting on proposal:", error);
     throw error;
   }
+};
+
+export const voteOnChapter = async (
+  storyId: number,
+  chapterId: number,
+  choiceIndex: number,
+  account: any
+) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "voteOnChapter",
+      [BigInt(storyId), BigInt(chapterId), BigInt(choiceIndex)],
+      account
+    );
+    return transactionHash;
+  } catch (error) {
+    console.error("Error voting on chapter:", error);
+    throw error;
+  }
+};
+
+export const resolveProposal = async (storyId: number, account: any) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "resolveProposal",
+      [BigInt(storyId)],
+      account
+    );
+    return transactionHash;
+  } catch (error) {
+    console.error("Error resolving proposal:", error);
+    throw error;
+  }
+};
+
+export const resolveChapter = async (
+  storyId: number,
+  chapterId: number,
+  account: any
+) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "resolveChapter",
+      [BigInt(storyId), BigInt(chapterId)],
+      account
+    );
+    return transactionHash;
+  } catch (error) {
+    console.error("Error resolving chapter:", error);
+    throw error;
+  }
+};
+
+// Events
+const getContractEvent = async (eventName: string) => {
+  const myEvent = prepareEvent({
+    signature: `event ${eventName}`,
+  });
+
+  const events = await getContractEvents({
+    contract, // your thirdweb contract instance
+    events: [myEvent],
+  });
+
+  return events.map((event: any) => event.args);
+};
+
+export const getVoteCastEvents = async () => {
+  return await getContractEvent(
+    "VoteCast(uint256 indexed storyId, uint256 indexed chapterId, address indexed voter, uint256 choiceIndex)"
+  );
 };

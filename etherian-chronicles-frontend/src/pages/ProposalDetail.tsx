@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   getActiveProposals,
   getUserProposalVote,
+  resolveProposal,
   voteOnProposal,
 } from "@/data/proposalData";
 import { formatAddress, getTimeAgo, getTimeRemaining } from "@/lib/utils";
@@ -115,6 +116,27 @@ const ProposalDetail = () => {
       });
 
       toastResult.dismiss();
+    }
+  };
+
+  const handleResolve = async () => {
+    const transactionHash = await resolveProposal(
+      proposal.storyId,
+      account // the account sending the transaction
+    );
+    if (transactionHash) {
+      toast({
+        variant: "success",
+        title: "Proposal resolved",
+        description: "The proposal has been resolved successfully.",
+      });
+      fetchProposal();
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Resolution failed",
+        description: "There was an error resolving the proposal.",
+      });
     }
   };
 
@@ -280,6 +302,10 @@ const ProposalDetail = () => {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
+                <Button variant="outline" onClick={handleResolve}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Resolve
+                </Button>
               </div>
             </div>
           </div>
@@ -302,7 +328,7 @@ const ProposalDetail = () => {
 
           <div className="space-y-3">
             <h4 className="font-semibold">Potential Choices:</h4>
-            {proposal.chapters[0].votingOptions.map((choice, index) => (
+            {proposal.chapters[0].choices.map((choice, index) => (
               <div
                 key={index}
                 className="p-3 bg-muted/30 rounded-lg border border-border"

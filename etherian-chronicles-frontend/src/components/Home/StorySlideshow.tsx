@@ -1,24 +1,31 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Crown, Users, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useCallback } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Crown,
+  Users,
+  TrendingUp,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { formatAddress } from "@/lib/utils";
 
 const StorySlideshow = ({ stories }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % stories.length);
-  };
+  }, [stories.length]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + stories.length) % stories.length);
-  };
+  }, [stories.length]);
 
   useEffect(() => {
     const interval = setInterval(nextSlide, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [nextSlide]);
 
   if (!stories || stories.length === 0) return null;
 
@@ -27,11 +34,11 @@ const StorySlideshow = ({ stories }) => {
   return (
     <section className="relative overflow-hidden border-b border-border">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20" />
-      
+
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src={currentStory.coverImage}
+          src={currentStory.ipfsHashImage}
           alt={currentStory.title}
           className="w-full h-full object-cover opacity-20"
         />
@@ -43,10 +50,8 @@ const StorySlideshow = ({ stories }) => {
           {/* Content - Centered */}
           <div className="text-center max-w-4xl mx-auto">
             <div className="flex items-center justify-center space-x-2 mb-6">
-              <Badge className="bg-primary/90 text-white">
-                Featured Story
-              </Badge>
-              {currentStory.trending && (
+              <Badge className="bg-primary/90 text-white">Featured Story</Badge>
+              {currentStory.isTrending && (
                 <Badge variant="secondary" className="bg-secondary/90">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   Trending
@@ -61,12 +66,12 @@ const StorySlideshow = ({ stories }) => {
             <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground mb-6">
               <div className="flex items-center space-x-1">
                 <Crown className="h-4 w-4" />
-                <span>by {currentStory.creator.username}</span>
+                <span>by {formatAddress(currentStory.writer)}</span>
               </div>
               <span>•</span>
               <div className="flex items-center space-x-1">
                 <Users className="h-4 w-4" />
-                <span>{currentStory.votesTotal} votes</span>
+                <span>{currentStory.totalVotes} votes</span>
               </div>
             </div>
 
@@ -75,7 +80,7 @@ const StorySlideshow = ({ stories }) => {
             </p>
 
             <div className="flex flex-wrap gap-2 justify-center mb-8">
-              {currentStory.genre.slice(0, 3).map((genre) => (
+              {currentStory.chapters[0].genres.slice(0, 3).map((genre) => (
                 <Badge key={genre} variant="outline">
                   {genre}
                 </Badge>
@@ -108,7 +113,9 @@ const StorySlideshow = ({ stories }) => {
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentSlide ? 'bg-primary' : 'bg-muted-foreground/30'
+                  index === currentSlide
+                    ? "bg-primary"
+                    : "bg-muted-foreground/30"
                 }`}
               />
             ))}

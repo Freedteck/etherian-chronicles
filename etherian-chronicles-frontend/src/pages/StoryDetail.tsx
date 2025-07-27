@@ -1,25 +1,34 @@
-import { useParams, Link } from 'react-router-dom';
-import { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Crown, 
-  Users, 
-  Clock, 
-  BookOpen, 
-  Vote, 
+import { useParams, Link } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  Crown,
+  Users,
+  Clock,
+  BookOpen,
+  Vote,
   Share2,
   ChevronLeft,
   ChevronRight,
   Star,
-  Plus
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import Header from '@/components/Layout/Header';
-import VotingInterface from '@/components/Story/VotingInterface';
-import AddChapterModal from '@/components/Story/AddChapterModal';
-import { mockStories } from '@/data/mockData';
-import { useToast } from '@/hooks/use-toast';
+  Plus,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Header from "@/components/Layout/Header";
+import VotingInterface from "@/components/Story/VotingInterface";
+import AddChapterModal from "@/components/Story/AddChapterModal";
+import { useToast } from "@/hooks/use-toast";
+import { useActiveAccount } from "thirdweb/react";
+import {
+  getActiveProposals,
+  getActiveStories,
+  getVoteCastEvents,
+  resolveChapter,
+  voteOnChapter,
+} from "@/data/proposalData";
+import { formatAddress, getTimeAgo } from "@/lib/utils";
+import ProposalLoading from "@/components/ui/proposalLoading";
 
 const StoryDetail = () => {
   const { id } = useParams();
@@ -27,15 +36,51 @@ const StoryDetail = () => {
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [userVotes, setUserVotes] = useState({});
   const [showAddChapterModal, setShowAddChapterModal] = useState(false);
+  const [story, setStory] = useState(null);
+  const [isStoryLoading, setIsStoryLoading] = useState(false);
+  const account = useActiveAccount();
 
-  const story = mockStories.find(s => s.id === parseInt(id || ''));
-  
+  const fetchStory = useCallback(async () => {
+    setIsStoryLoading(true);
+    // TODO: Comment out this line and uncomment the next line when stories are ready
+    // const {
+    //   activeProposals: activeStories,
+    //   isProposalLoading: isStoryLoading,
+    // } = await getActiveProposals();
+    const { activeStories, isStoryLoading } = await getActiveStories();
+    const currentStory = activeStories.find((p) => p.storyId === +id);
+    setIsStoryLoading(isStoryLoading);
+
+    setStory(currentStory);
+
+    if (currentStory) {
+      const userVoteOption = await getVoteCastEvents();
+
+      setUserVotes(
+        userVoteOption.filter(
+          (vote) =>
+            vote.voter === account?.address && Number(vote.storyId) === +id
+        )
+      );
+    }
+  }, [id, account]);
+
+  useEffect(() => {
+    fetchStory();
+  }, [fetchStory]);
+
+  if (isStoryLoading) {
+    return <ProposalLoading />;
+  }
+
   if (!story) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-display font-bold mb-4">Story Not Found</h1>
+          <h1 className="text-2xl font-display font-bold mb-4">
+            Story Not Found
+          </h1>
           <Link to="/stories">
             <Button variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -47,14 +92,19 @@ const StoryDetail = () => {
     );
   }
 
+  const totalVotes = story.proposalYesVotes + story.proposalNoVotes;
+
   const currentChapter = story.chapters[currentChapterIndex];
 
-  const handleVote = (chapterId: number, choiceId: string) => {
-    setUserVotes(prev => ({
-      ...prev,
-      [chapterId]: choiceId
-    }));
-    
+  const handleVote = (chapterId: number, choiceId: number) => {
+    console.log("Voting for choice:", choiceId);
+    const transactionHash = voteOnChapter(
+      story.storyId,
+      currentChapter.chapterId,
+      choiceId,
+      account
+    );
+    console.log(`Vote cast successfully: ${transactionHash}`);
     toast({
       title: "Vote recorded!",
       description: "Your choice will help shape the story's direction.",
@@ -69,6 +119,33 @@ const StoryDetail = () => {
     });
   };
 
+  const handleResolve = async () => {
+    if (!story) return;
+    toast({
+      title: "Resolving Chapter",
+      description: "Please wait while we resolve the chapter.",
+    });
+    try {
+      const transactionHash = await resolveChapter(
+        story.storyId,
+        currentChapter.chapterId,
+        account
+      );
+      toast({
+        title: "Chapter Resolved!",
+        description: "The chapter has been resolved successfully.",
+      });
+
+      console.log(`Chapter resolved successfully: ${transactionHash}`);
+    } catch (error) {
+      console.error("Error resolving chapter:", error);
+      toast({
+        title: "Error Resolving Chapter",
+        description: "There was an error resolving the chapter.",
+      });
+    }
+  };
+
   const handleChapterAdded = () => {
     toast({
       title: "Chapter Added!",
@@ -77,54 +154,67 @@ const StoryDetail = () => {
   };
 
   // Check if current user is author or collaborator
-  const isAuthorOrCollaborator = true; // In real app, check against user data
+  const isAuthorOrCollaborator = story.collaborators.includes(account?.address); // In real app, check against user data
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       {/* Hero Section with Story Cover */}
       <section className="relative h-[60vh] overflow-hidden">
         <div className="absolute inset-0">
-          <img 
-            src={story.coverImage} 
+          <img
+            src={story.ipfsHashImage}
             alt={story.title}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
         </div>
-        
+
         <div className="relative container mx-auto px-4 h-full flex items-end pb-16">
           <div className="max-w-4xl">
             {/* Back Navigation */}
             <div className="mb-6">
               <Link to="/stories">
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button
+                  variant="ghost"
+                  className="text-white hover:bg-white/20"
+                >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Stories
                 </Button>
               </Link>
             </div>
-            
+
             {/* Story Title and Meta */}
             <div className="mb-6">
               <div className="flex items-center space-x-3 mb-4">
-                <Badge className={story.status === 'active' ? 'bg-primary/90 text-white' : 'bg-secondary/90 text-white'}>
-                  {story.status === 'active' ? 'Active Story' : 'Complete Story'}
+                <Badge
+                  className={
+                    story.status === 1 || story.status === 3
+                      ? "bg-primary/90 text-white"
+                      : "bg-secondary/90 text-white"
+                  }
+                >
+                  {story.status === 1
+                    ? "Active Story"
+                    : story.status === 3
+                    ? "Complete Story"
+                    : "Paused Story"}
                 </Badge>
                 <div className="text-white/80 text-sm">
                   Chapter {currentChapterIndex + 1} of {story.chapters.length}
                 </div>
               </div>
-              
+
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white mb-4 leading-tight">
                 {story.title}
               </h1>
-              
+
               <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm mb-4">
                 <div className="flex items-center space-x-1">
                   <Crown className="h-4 w-4" />
-                  <span>by {story.creator.username}</span>
+                  <span>by {formatAddress(story.writer)}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Users className="h-4 w-4" />
@@ -132,28 +222,29 @@ const StoryDetail = () => {
                 </div>
                 <div className="flex items-center space-x-1">
                   <Vote className="h-4 w-4" />
-                  <span>{story.votesTotal} votes</span>
+                  <span>{totalVotes} votes</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Clock className="h-4 w-4" />
-                  <span>Updated {new Date(story.lastUpdate).toLocaleDateString()}</span>
+                  <span>Updated {getTimeAgo(story.createdAt)}</span>
                 </div>
               </div>
-              
-              
+
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                <Button className="btn-mystical">
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Continue Reading
-                </Button>
-                <Button variant="outline" onClick={handleShare} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                {isAuthorOrCollaborator && (
+                  <Button className="btn-mystical" onClick={handleResolve}>
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Resolve Chapter
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={handleShare}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
-                </Button>
-                <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                  <Star className="h-4 w-4 mr-2" />
-                  Follow
                 </Button>
               </div>
             </div>
@@ -168,9 +259,9 @@ const StoryDetail = () => {
             <p className="text-muted-foreground mb-6 leading-relaxed text-lg">
               {story.summary}
             </p>
-            
+
             <div className="flex flex-wrap gap-2">
-              {story.genre.map((genre) => (
+              {story.chapters[0].genres.map((genre) => (
                 <Badge key={genre} variant="outline">
                   {genre}
                 </Badge>
@@ -186,26 +277,35 @@ const StoryDetail = () => {
               <h2 className="text-xl font-display font-semibold">
                 {currentChapter.title}
               </h2>
-              
+
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentChapterIndex(Math.max(0, currentChapterIndex - 1))}
+                  onClick={() =>
+                    setCurrentChapterIndex(Math.max(0, currentChapterIndex - 1))
+                  }
                   disabled={currentChapterIndex === 0}
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
                 </Button>
-                
+
                 <span className="text-sm text-muted-foreground px-3">
                   {currentChapterIndex + 1} / {story.chapters.length}
                 </span>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentChapterIndex(Math.min(story.chapters.length - 1, currentChapterIndex + 1))}
+                  onClick={() =>
+                    setCurrentChapterIndex(
+                      Math.min(
+                        story.chapters.length - 1,
+                        currentChapterIndex + 1
+                      )
+                    )
+                  }
                   disabled={currentChapterIndex === story.chapters.length - 1}
                 >
                   Next
@@ -233,11 +333,12 @@ const StoryDetail = () => {
             {currentChapter.choices && (
               <VotingInterface
                 chapter={currentChapter}
-                onVote={(choiceId) => handleVote(currentChapter.id, choiceId)}
-                userVote={userVotes[currentChapter.id]}
+                onVote={(choiceId) =>
+                  handleVote(currentChapter.chapterId, choiceId)
+                }
+                userVote={userVotes[currentChapter.chapterId]}
               />
             )}
-
           </div>
 
           {/* Sidebar */}
@@ -251,32 +352,38 @@ const StoryDetail = () => {
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {story.chapters.map((chapter, index) => (
                   <div
-                    key={chapter.id}
+                    key={chapter.chapterId}
                     className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                      index === currentChapterIndex 
-                        ? 'bg-primary/10 border border-primary/20' 
-                        : 'hover:bg-muted/50'
+                      index === currentChapterIndex
+                        ? "bg-primary/10 border border-primary/20"
+                        : "hover:bg-muted/50"
                     }`}
                     onClick={() => setCurrentChapterIndex(index)}
                   >
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      index <= currentChapterIndex 
-                        ? 'bg-primary text-white' 
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        index <= currentChapterIndex
+                          ? "bg-primary text-white"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
                       {index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{chapter.title}</div>
-                      {chapter.resolved ? (
-                        <div className="text-xs text-muted-foreground">Resolved</div>
+                      <div className="text-sm font-medium truncate">
+                        {chapter.title}
+                      </div>
+                      {chapter.isResolved ? (
+                        <div className="text-xs text-muted-foreground">
+                          Resolved
+                        </div>
                       ) : (
                         <div className="text-xs text-primary">Voting Open</div>
                       )}
                     </div>
                   </div>
                 ))}
-                
+
                 {/* Add Chapter Button for Authors/Collaborators */}
                 {isAuthorOrCollaborator && (
                   <Button
@@ -304,25 +411,33 @@ const StoryDetail = () => {
                     <Crown className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium">{story.creator.username}</div>
-                    <div className="text-xs text-muted-foreground">Story Creator</div>
+                    <div className="text-sm font-medium">
+                      {formatAddress(story.writer)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Story Creator
+                    </div>
                   </div>
                 </div>
-                
-                {story.collaborators.slice(0, 3).map((collaborator) => (
-                  <div key={collaborator.id} className="flex items-center space-x-3 p-2">
-                    <img 
-                      src={collaborator.avatar} 
-                      alt={collaborator.username}
+
+                {story.collaborators.slice(0, 3).map((collaborator, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-2">
+                    <img
+                      src={collaborator?.avatar}
+                      alt={collaborator}
                       className="w-8 h-8 rounded-full"
                     />
                     <div>
-                      <div className="text-sm font-medium">{collaborator.username}</div>
-                      <div className="text-xs text-muted-foreground">Collaborator</div>
+                      <div className="text-sm font-medium">
+                        {formatAddress(collaborator)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Collaborator
+                      </div>
                     </div>
                   </div>
                 ))}
-                
+
                 {story.collaborators.length > 3 && (
                   <div className="text-xs text-muted-foreground text-center pt-2">
                     +{story.collaborators.length - 3} more collaborators
@@ -336,16 +451,26 @@ const StoryDetail = () => {
               <h3 className="font-display font-semibold mb-4">Statistics</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Votes</span>
-                  <span className="text-sm font-medium">{story.votesTotal}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Total Votes
+                  </span>
+                  <span className="text-sm font-medium">{totalVotes}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Collaborators</span>
-                  <span className="text-sm font-medium">{story.collaborators.length}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Collaborators
+                  </span>
+                  <span className="text-sm font-medium">
+                    {story.collaborators.length}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Last Update</span>
-                  <span className="text-sm font-medium">{new Date(story.lastUpdate).toLocaleDateString()}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Last Update
+                  </span>
+                  <span className="text-sm font-medium">
+                    {new Date(story.lastUpdate).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>

@@ -1,35 +1,68 @@
-import { useState } from 'react';
-import { Search, Filter, BookOpen, TrendingUp, Clock, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import StoryCard from '@/components/Story/StoryCard';
-import Header from '@/components/Layout/Header';
-import PageBanner from '@/components/Layout/PageBanner';
-import { mockStories } from '@/data/mockData';
+import { useEffect, useState } from "react";
+import { Search, BookOpen, TrendingUp, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import StoryCard from "@/components/Story/StoryCard";
+import Header from "@/components/Layout/Header";
+import PageBanner from "@/components/Layout/PageBanner";
+import { mockStories } from "@/data/mockData";
+import { getActiveProposals, getActiveStories } from "@/data/proposalData";
+import CardLoading from "@/components/ui/cardLoaing";
 
 const Stories = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('all');
-  const [sortBy, setSortBy] = useState('trending');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [sortBy, setSortBy] = useState("trending");
+  const [activeStories, setActiveStories] = useState([]);
+  const [isStoryLoading, setIsStoryLoading] = useState(false);
 
-  const allGenres = ['all', 'Fantasy', 'Adventure', 'Steampunk', 'Political', 'Revolution', 'Technology'];
-  
-  const filteredStories = mockStories.filter(story => {
-    const matchesSearch = story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         story.summary.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGenre = selectedGenre === 'all' || story.genre.includes(selectedGenre);
+  useEffect(() => {
+    const fetchProposals = async () => {
+      setIsStoryLoading(true);
+      // TODO: Comment out this line and uncomment the next line when stories are ready
+      // const { activeProposals, isProposalLoading: isLoading } =
+      //   await getActiveProposals();
+
+      const { activeStories, isStoryLoading: isLoading } =
+        await getActiveStories();
+      setActiveStories(activeStories);
+      setIsStoryLoading(isLoading);
+    };
+
+    fetchProposals();
+  }, []);
+
+  const allGenres = [
+    "all",
+    "Fantasy",
+    "Adventure",
+    "Steampunk",
+    "Political",
+    "Revolution",
+    "Technology",
+  ];
+
+  const filteredStories = activeStories.filter((story) => {
+    const matchesSearch =
+      story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      story.summary.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesGenre =
+      selectedGenre === "all" ||
+      story.chapters[0].genres.includes(selectedGenre);
     return matchesSearch && matchesGenre;
   });
 
   const sortedStories = [...filteredStories].sort((a, b) => {
+    const storyATotalVotes = a.proposalYesVotes + a.proposalNoVotes || 0;
+    const storyBTotalVotes = b.proposalYesVotes + b.proposalNoVotes || 0;
     switch (sortBy) {
-      case 'trending':
-        return b.votesTotal - a.votesTotal;
-      case 'newest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'updated':
-        return new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime();
+      case "trending":
+        return storyBTotalVotes - storyATotalVotes;
+      case "newest":
+        return (
+          new Date(b.createdAt * 1000).getTime() -
+          new Date(a.createdAt * 1000).getTime()
+        );
       default:
         return 0;
     }
@@ -38,7 +71,7 @@ const Stories = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <PageBanner
         title="Story Collection"
         subtitle="Discover epic tales shaped by community choices"
@@ -46,9 +79,8 @@ const Stories = () => {
         backgroundImage="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
         size="small"
       />
-      
-      <div className="container mx-auto px-4 py-8">
 
+      <div className="container mx-auto px-4 py-8">
         {/* Filters and Search */}
         <div className="mb-8 space-y-4">
           {/* Search Bar */}
@@ -74,7 +106,7 @@ const Stories = () => {
                   onClick={() => setSelectedGenre(genre)}
                   className={selectedGenre === genre ? "btn-mystical" : ""}
                 >
-                  {genre === 'all' ? 'All Genres' : genre}
+                  {genre === "all" ? "All Genres" : genre}
                 </Button>
               ))}
             </div>
@@ -84,9 +116,8 @@ const Stories = () => {
               <span className="text-sm text-muted-foreground">Sort by:</span>
               <div className="flex space-x-1">
                 {[
-                  { key: 'trending', label: 'Trending', icon: TrendingUp },
-                  { key: 'newest', label: 'Newest', icon: Clock },
-                  { key: 'updated', label: 'Updated', icon: BookOpen }
+                  { key: "trending", label: "Trending", icon: TrendingUp },
+                  { key: "newest", label: "Newest", icon: Clock },
                 ].map((option) => {
                   const Icon = option.icon;
                   return (
@@ -95,7 +126,9 @@ const Stories = () => {
                       variant={sortBy === option.key ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setSortBy(option.key)}
-                      className={`${sortBy === option.key ? "btn-mystical" : ""} flex items-center space-x-1`}
+                      className={`${
+                        sortBy === option.key ? "btn-mystical" : ""
+                      } flex items-center space-x-1`}
                     >
                       <Icon className="h-3 w-3" />
                       <span className="hidden sm:inline">{option.label}</span>
@@ -110,32 +143,40 @@ const Stories = () => {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
-            Showing {sortedStories.length} of {mockStories.length} stories
+            Showing {sortedStories.length} of {activeStories.length} stories
           </p>
         </div>
 
         {/* Stories Grid */}
-        {sortedStories.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedStories.map((story) => (
-              <StoryCard key={story.id} story={story} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">No stories found</h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search terms or filters
-            </p>
-            <Button variant="outline" onClick={() => {
-              setSearchTerm('');
-              setSelectedGenre('all');
-            }}>
-              Clear Filters
-            </Button>
-          </div>
-        )}
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isStoryLoading ? (
+            <CardLoading />
+          ) : sortedStories.length > 0 ? (
+            sortedStories.map((story) => (
+              <StoryCard key={story.storyId} story={story} />
+            ))
+          ) : (
+            <div className="text-center py-12 col-span-full">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                No stories found
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your search terms or filters
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedGenre("all");
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
+        </div>
 
         {/* Load More Button (for future pagination) */}
         {sortedStories.length > 0 && (

@@ -11,11 +11,6 @@ import { uploadJsonToPinata } from "@/lib/pinata";
 import { createStory } from "@/data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
 
-interface VotingOption {
-  id: string;
-  text: string;
-}
-
 interface Collaborator {
   id: string;
   address: string;
@@ -29,7 +24,7 @@ interface FormData {
   genres: string[];
   chapterTitle: string;
   firstChapter: string;
-  votingOptions: VotingOption[];
+  votingOptions: string[];
   collaborators: Collaborator[];
 }
 
@@ -148,7 +143,7 @@ const CreateStoryForm = () => {
 
     if (validateStep(currentStep)) {
       setIsSubmitting(true);
-      
+
       const toastResult = toast({
         title: "Creating story...",
         description: "Your story is being created. Please wait.",
@@ -164,7 +159,7 @@ const CreateStoryForm = () => {
         };
 
         const firstChapterIpfsUrl = await uploadJsonToPinata(firstChapter);
-        
+
         if (!firstChapterIpfsUrl) {
           if (loadingToastId) {
             toastResult.dismiss();
@@ -187,11 +182,11 @@ const CreateStoryForm = () => {
         };
 
         const transactionHash = await createStory(storyData, account);
-        
+
         if (loadingToastId) {
           toastResult.dismiss();
         }
-        
+
         if (transactionHash) {
           toast({
             variant: "success",

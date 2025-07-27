@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import Header from "@/components/Layout/Header";
 import PageBanner from "@/components/Layout/PageBanner";
 import ProposalCard from "@/components/Proposal/ProposalCard";
-import { mockProposals } from "@/data/mockData";
 import { getActiveProposals } from "@/data/proposalData";
 import CardLoading from "@/components/ui/cardLoaing";
 

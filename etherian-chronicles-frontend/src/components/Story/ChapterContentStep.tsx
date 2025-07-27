@@ -1,22 +1,18 @@
-import { useState } from 'react';
-import { BookOpen, Plus, X, Vote } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-
-interface VotingOption {
-  id: string;
-  text: string;
-}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import { BookOpen, Plus, X, Vote } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface ChapterContentStepProps {
   data: {
     chapterTitle: string;
     firstChapter: string;
-    votingOptions: VotingOption[];
+    votingOptions: string[];
   };
   errors: {
     chapterTitle?: string;
@@ -26,33 +22,37 @@ interface ChapterContentStepProps {
   onUpdate: (updates: any) => void;
 }
 
-const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps) => {
-  const [newOption, setNewOption] = useState('');
+const ChapterContentStep = ({
+  data,
+  errors,
+  onUpdate,
+}: ChapterContentStepProps) => {
+  const [newOption, setNewOption] = useState("");
 
   const addVotingOption = () => {
     if (newOption.trim() && data.votingOptions.length < 6) {
-      const newOptionObj = {
-        id: Date.now().toString(),
-        text: newOption.trim()
-      };
       onUpdate({
-        votingOptions: [...data.votingOptions, newOptionObj]
+        votingOptions: [...data.votingOptions, newOption.trim()],
       });
-      setNewOption('');
+      setNewOption("");
     }
   };
 
-  const removeVotingOption = (id: string) => {
+  const removeVotingOption = (voteOption: string) => {
     onUpdate({
-      votingOptions: data.votingOptions.filter(option => option.id !== id)
+      votingOptions: data.votingOptions.filter(
+        (option) => option !== voteOption
+      ),
     });
   };
 
-  const updateVotingOption = (id: string, text: string) => {
+  const updateVotingOption = (text: string) => {
+    console.log(text);
+
     onUpdate({
-      votingOptions: data.votingOptions.map(option => 
-        option.id === id ? { ...option, text } : option
-      )
+      votingOptions: data.votingOptions.map((option) =>
+        option === text ? text : option
+      ),
     });
   };
 
@@ -66,7 +66,7 @@ const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps)
           </div>
           <h2 className="text-xl font-display font-bold">Chapter 1: Opening</h2>
         </div>
-        
+
         <div className="space-y-6">
           {/* Chapter Title */}
           <div className="space-y-2">
@@ -76,17 +76,23 @@ const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps)
               placeholder="Enter chapter title (e.g., 'The Journey Begins')"
               value={data.chapterTitle}
               onChange={(e) => onUpdate({ chapterTitle: e.target.value })}
-              aria-describedby={errors.chapterTitle ? "chapterTitle-error" : undefined}
+              aria-describedby={
+                errors.chapterTitle ? "chapterTitle-error" : undefined
+              }
               aria-invalid={!!errors.chapterTitle}
             />
             {errors.chapterTitle && (
-              <p id="chapterTitle-error" className="text-sm text-destructive">{errors.chapterTitle}</p>
+              <p id="chapterTitle-error" className="text-sm text-destructive">
+                {errors.chapterTitle}
+              </p>
             )}
           </div>
 
           {/* Chapter Content */}
           <div className="space-y-2">
-            <Label htmlFor="firstChapter">Chapter Content * (max 5000 characters)</Label>
+            <Label htmlFor="firstChapter">
+              Chapter Content * (max 5000 characters)
+            </Label>
             <Textarea
               id="firstChapter"
               placeholder="Begin your story here... Set the scene, introduce your characters, and hook your readers..."
@@ -95,14 +101,21 @@ const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps)
               className="text-base leading-relaxed"
               value={data.firstChapter}
               onChange={(e) => onUpdate({ firstChapter: e.target.value })}
-              aria-describedby={`firstChapter-count ${errors.firstChapter ? "firstChapter-error" : ""}`.trim()}
+              aria-describedby={`firstChapter-count ${
+                errors.firstChapter ? "firstChapter-error" : ""
+              }`.trim()}
               aria-invalid={!!errors.firstChapter}
             />
-            <p id="firstChapter-count" className="text-sm text-muted-foreground">
+            <p
+              id="firstChapter-count"
+              className="text-sm text-muted-foreground"
+            >
               {data.firstChapter.length}/5000 characters
             </p>
             {errors.firstChapter && (
-              <p id="firstChapter-error" className="text-sm text-destructive">{errors.firstChapter}</p>
+              <p id="firstChapter-error" className="text-sm text-destructive">
+                {errors.firstChapter}
+              </p>
             )}
           </div>
         </div>
@@ -116,10 +129,11 @@ const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps)
           </div>
           <h2 className="text-xl font-display font-bold">Voting Options</h2>
         </div>
-        
+
         <div className="space-y-6">
           <p className="text-sm text-muted-foreground">
-            Add voting options to let readers choose the story's direction. This is optional, but if you add options, you need at least 2.
+            Add voting options to let readers choose the story's direction. This
+            is optional, but if you add options, you need at least 2.
           </p>
 
           {/* Current Options */}
@@ -127,13 +141,16 @@ const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps)
             <div className="space-y-3">
               <Label>Current Options:</Label>
               {data.votingOptions.map((option, index) => (
-                <div key={option.id} className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                <div
+                  key={option}
+                  className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg"
+                >
                   <Badge variant="outline" className="text-xs">
                     Option {String.fromCharCode(65 + index)}
                   </Badge>
                   <Input
-                    value={option.text}
-                    onChange={(e) => updateVotingOption(option.id, e.target.value)}
+                    value={option}
+                    onChange={(e) => updateVotingOption(e.target.value)}
                     placeholder="Enter voting option..."
                     className="flex-1"
                   />
@@ -141,7 +158,7 @@ const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps)
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => removeVotingOption(option.id)}
+                    onClick={() => removeVotingOption(option)}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -161,7 +178,7 @@ const ChapterContentStep = ({ data, errors, onUpdate }: ChapterContentStepProps)
                   onChange={(e) => setNewOption(e.target.value)}
                   placeholder="Enter a path readers can choose..."
                   className="flex-1"
-                  onKeyPress={(e) => e.key === 'Enter' && addVotingOption()}
+                  onKeyPress={(e) => e.key === "Enter" && addVotingOption()}
                 />
                 <Button
                   type="button"

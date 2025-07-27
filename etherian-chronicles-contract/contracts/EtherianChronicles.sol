@@ -36,13 +36,16 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
     uint256 private _storyIdCounter;
     uint256 private _loreFragmentTokenIdCounter;
 
+    uint256 public constant PROPOSAL_VOTING_PERIOD = 5 minutes;
+    uint256 public constant CHAPTER_VOTING_PERIOD = 5 minutes;
+
     // Enum for story status
     enum StoryStatus {
         PROPOSAL_PENDING_VOTE, // Story is proposed, waiting for community vote
         ACTIVE,                // Story approved, active for chapter voting
         REJECTED,              // Story proposal rejected by community
         COMPLETED,             // Story concluded
-        PAUSED                 // Optional: for moderation or emergencies
+        PAUSED                // Optional: for moderation or emergencies
     }
 
     // Enum for proposal vote type
@@ -64,6 +67,7 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         uint256 storyId;           // ID of the parent story
         string ipfsHash;           // IPFS hash of the chapter's content (text)
         Choice[] choices;          // Array of choices for this chapter
+        uint256 createdAt;         // Timestamp when chapter was created
         uint256 voteEndTime;       // Timestamp when voting ends for this chapter
         uint256 winningChoiceIndex; // Index of the winning choice (-1 if not resolved)
         bool isResolved;           // True if the chapter's vote is resolved
@@ -79,10 +83,11 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         string ipfsHashImage;                // IPFS hash for the story's cover image
         address[] collaborators;             // List of addresses authorized to add chapters/manage
         StoryStatus status;                  // Current status of the story
+        uint256 createdAt;                   // Timestamp when story was created
         uint256 proposalVoteEndTime;         // Timestamp when proposal voting ends
         mapping(address => ProposalVoteType) proposalVotes; // Tracks proposal votes
-        uint256 proposalYesVotes;            // Count of YES votes for the proposal (fixed from uint255)
-        uint256 proposalNoVotes;             // Count of NO votes for the proposal (fixed from uint255)
+        uint256 proposalYesVotes;            // Count of YES votes for the proposal
+        uint256 proposalNoVotes;             // Count of NO votes for the proposal
         uint256 currentChapterIndex;         // Index of the current active chapter being voted on
         Chapter[] chapters;                  // Array of all chapters in the story
         mapping(address => bool) isCollaborator; // Quick lookup for collaborators
@@ -172,7 +177,6 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
      * @param _ipfsHashChapter1Content IPFS hash for the content of the first chapter.
      * @param _chapter1Choices An array of choices for the first chapter.
      * @param _collaborators Initial list of collaborators.
-     * @param _proposalVoteDuration Duration in seconds for the proposal voting phase.
      */
     function createStoryProposal(
         string calldata _title,
@@ -180,20 +184,17 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         string calldata _ipfsHashImage,
         string calldata _ipfsHashChapter1Content,
         string[] calldata _chapter1Choices,
-        address[] calldata _collaborators,
-        uint256 _proposalVoteDuration
+        address[] calldata _collaborators
     ) external nonReentrant {
-        // Input validation
-        require(_proposalVoteDuration > 0, "Proposal vote duration must be positive");
+        // Input validation (remove proposal vote duration check)
         require(bytes(_title).length > 0, "Title cannot be empty");
         require(bytes(_summary).length > 0, "Summary cannot be empty");
         require(bytes(_ipfsHashImage).length > 0, "Image hash cannot be empty");
         require(bytes(_ipfsHashChapter1Content).length > 0, "Chapter 1 content hash cannot be empty");
-        require(_chapter1Choices.length >= 2, "Chapter must have at least 2 choices");
 
         uint256 storyId = _storyIdCounter++;
         
-        _initializeStory(storyId, _title, _summary, _ipfsHashImage, _proposalVoteDuration);
+        _initializeStory(storyId, _title, _summary, _ipfsHashImage);
         _setupCollaborators(storyId, _collaborators);
         _createFirstChapter(storyId, _ipfsHashChapter1Content, _chapter1Choices);
 
@@ -207,8 +208,7 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         uint256 _storyId,
         string calldata _title,
         string calldata _summary,
-        string calldata _ipfsHashImage,
-        uint256 _proposalVoteDuration
+        string calldata _ipfsHashImage
     ) internal {
         Story storage story = stories[_storyId];
         story.storyId = _storyId;
@@ -217,7 +217,8 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         story.summary = _summary;
         story.ipfsHashImage = _ipfsHashImage;
         story.status = StoryStatus.PROPOSAL_PENDING_VOTE;
-        story.proposalVoteEndTime = block.timestamp + _proposalVoteDuration;
+        story.createdAt = block.timestamp;
+        story.proposalVoteEndTime = block.timestamp + PROPOSAL_VOTING_PERIOD;
         story.proposalYesVotes = 0;
         story.proposalNoVotes = 0;
         story.currentChapterIndex = 0;
@@ -254,7 +255,8 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         firstChapter.chapterId = 0;
         firstChapter.storyId = _storyId;
         firstChapter.ipfsHash = _ipfsHashChapter1Content;
-        firstChapter.voteEndTime = 0;
+        firstChapter.createdAt = block.timestamp;
+        firstChapter.voteEndTime = 0; // Will be set when story is approved
         firstChapter.winningChoiceIndex = type(uint256).max;
         firstChapter.isResolved = false;
         firstChapter.voteCountSum = 0;
@@ -307,8 +309,9 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
 
         if (story.proposalYesVotes > story.proposalNoVotes) {
             story.status = StoryStatus.ACTIVE;
-            story.chapters[0].isResolved = true;
-            story.chapters[0].winningChoiceIndex = 0;
+            // Set voting period for first chapter when story is approved
+            story.chapters[0].voteEndTime = block.timestamp + CHAPTER_VOTING_PERIOD;
+            story.chapters[0].isResolved = false; // Allow voting on first chapter
             emit StoryApproved(_storyId);
         } else {
             story.status = StoryStatus.REJECTED;
@@ -325,19 +328,17 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
      * @param _previousChapterWinningChoiceIndex The index of the winning choice from the previous chapter that leads to this new chapter.
      * @param _ipfsHash IPFS hash of the new chapter's content.
      * @param _choices An array of choices for this new chapter.
-     * @param _voteDuration Duration in seconds for the chapter's voting phase.
      */
     function addChapter(
         uint256 _storyId,
         uint256 _previousChapterIndex,
         uint256 _previousChapterWinningChoiceIndex,
         string calldata _ipfsHash,
-        string[] calldata _choices,
-        uint256 _voteDuration
+        string[] calldata _choices
     ) external nonReentrant onlyCollaborator(_storyId) storyExists(_storyId) {
         Story storage story = stories[_storyId];
 
-        // Validation
+        // Validation (remove vote duration check)
         if (story.status != StoryStatus.ACTIVE) revert CannotAddChapterToNonActiveStory();
         if (_previousChapterIndex >= story.chapters.length) revert InvalidPreviousChapterIndex();
 
@@ -346,12 +347,10 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         if (prevChapter.winningChoiceIndex != _previousChapterWinningChoiceIndex) revert InvalidPreviousChapterIndex();
 
         if (story.chapters.length > 1 && !story.chapters[story.currentChapterIndex].isResolved) {
-             revert ChapterCannotBeAddedToLiveVote();
+            revert ChapterCannotBeAddedToLiveVote();
         }
 
-        require(_voteDuration > 0, "Vote duration must be positive");
         require(bytes(_ipfsHash).length > 0, "Chapter content hash cannot be empty");
-        require(_choices.length >= 2, "Chapter must have at least 2 choices");
 
         uint256 newChapterIndex = story.chapters.length;
         
@@ -359,10 +358,10 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         prevChapter.choices[_previousChapterWinningChoiceIndex].nextChapterIndex = newChapterIndex;
 
         // Create new chapter
-        _createNewChapter(story, newChapterIndex, _storyId, _ipfsHash, _choices, _voteDuration);
+        _createNewChapter(story, newChapterIndex, _storyId, _ipfsHash, _choices);
         
         story.currentChapterIndex = newChapterIndex;
-        emit ChapterAdded(_storyId, newChapterIndex, _ipfsHash, block.timestamp + _voteDuration);
+        emit ChapterAdded(_storyId, newChapterIndex, _ipfsHash, block.timestamp + CHAPTER_VOTING_PERIOD);
     }
 
     /**
@@ -373,14 +372,14 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         uint256 _chapterIndex,
         uint256 _storyId,
         string calldata _ipfsHash,
-        string[] calldata _choices,
-        uint256 _voteDuration
+        string[] calldata _choices
     ) internal {
         Chapter storage newChapter = _story.chapters.push();
         newChapter.chapterId = _chapterIndex;
         newChapter.storyId = _storyId;
         newChapter.ipfsHash = _ipfsHash;
-        newChapter.voteEndTime = block.timestamp + _voteDuration;
+        newChapter.createdAt = block.timestamp;
+        newChapter.voteEndTime = block.timestamp + CHAPTER_VOTING_PERIOD;
         newChapter.winningChoiceIndex = type(uint256).max;
         newChapter.isResolved = false;
         newChapter.voteCountSum = 0;
@@ -527,6 +526,7 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         uint256 chapterId,
         string memory ipfsHash,
         Choice[] memory choices,
+        uint256 createdAt,
         uint256 voteEndTime,
         uint256 winningChoiceIndex,
         bool isResolved,
@@ -537,6 +537,7 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
             chapter.chapterId,
             chapter.ipfsHash,
             chapter.choices,
+            chapter.createdAt,
             chapter.voteEndTime,
             chapter.winningChoiceIndex,
             chapter.isResolved,
@@ -594,5 +595,200 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
      */
     function getStoryCollaborators(uint256 _storyId) external view storyExists(_storyId) returns (address[] memory) {
         return stories[_storyId].collaborators;
+    }
+
+    /**
+     * @dev Gets detailed information about a story.
+     * @param _storyId The ID of the story.
+     */
+    function getStoryDetails(uint256 _storyId) external view storyExists(_storyId) returns (
+        uint256 storyId,
+        address writer,
+        string memory title,
+        string memory summary,
+        string memory ipfsHashImage,
+        address[] memory collaborators,
+        StoryStatus status,
+        uint256 createdAt,
+        uint256 proposalVoteEndTime,
+        uint256 proposalYesVotes,
+        uint256 proposalNoVotes,
+        uint256 currentChapterIndex,
+        uint256 totalChapters
+    ) {
+        Story storage story = stories[_storyId];
+        return (
+            story.storyId,
+            story.writer,
+            story.title,
+            story.summary,
+            story.ipfsHashImage,
+            story.collaborators,
+            story.status,
+            story.createdAt,
+            story.proposalVoteEndTime,
+            story.proposalYesVotes,
+            story.proposalNoVotes,
+            story.currentChapterIndex,
+            story.chapters.length
+        );
+    }
+
+    /**
+     * @dev Gets basic story information (lighter version).
+     * @param _storyId The ID of the story.
+     */
+    function getStoryBasicInfo(uint256 _storyId) external view storyExists(_storyId) returns (
+        string memory title,
+        string memory summary,
+        address writer,
+        StoryStatus status,
+        uint256 totalChapters
+    ) {
+        Story storage story = stories[_storyId];
+        return (
+            story.title,
+            story.summary,
+            story.writer,
+            story.status,
+            story.chapters.length
+        );
+    }
+
+    /**
+     * @dev Gets the total number of chapters for a story.
+     * @param _storyId The ID of the story.
+     */
+    function getTotalChapters(uint256 _storyId) external view storyExists(_storyId) returns (uint256) {
+        return stories[_storyId].chapters.length;
+    }
+
+    /**
+     * @dev Gets story status.
+     * @param _storyId The ID of the story.
+     */
+    function getStoryStatus(uint256 _storyId) external view storyExists(_storyId) returns (StoryStatus) {
+        return stories[_storyId].status;
+    }
+
+    /**
+     * @dev Gets proposal voting information.
+     * @param _storyId The ID of the story.
+     */
+    function getProposalInfo(uint256 _storyId) external view storyExists(_storyId) returns (
+        uint256 proposalVoteEndTime,
+        uint256 proposalYesVotes,
+        uint256 proposalNoVotes,
+        bool isVotingActive
+    ) {
+        Story storage story = stories[_storyId];
+        return (
+            story.proposalVoteEndTime,
+            story.proposalYesVotes,
+            story.proposalNoVotes,
+            block.timestamp < story.proposalVoteEndTime && story.status == StoryStatus.PROPOSAL_PENDING_VOTE
+        );
+    }
+
+    /**
+     * @dev Gets a user's vote on a proposal.
+     * @param _storyId The ID of the story.
+     * @param _voter The address of the voter.
+     */
+    function getUserProposalVote(uint256 _storyId, address _voter) external view storyExists(_storyId) returns (ProposalVoteType) {
+        return stories[_storyId].proposalVotes[_voter];
+    }
+
+    /**
+     * @dev Gets chapter choices (without the full chapter data).
+     * @param _storyId The ID of the story.
+     * @param _chapterIndex The index of the chapter.
+     */
+    function getChapterChoices(uint256 _storyId, uint256 _chapterIndex) external view storyExists(_storyId) chapterExists(_storyId, _chapterIndex) returns (Choice[] memory) {
+        return stories[_storyId].chapters[_chapterIndex].choices;
+    }
+
+    /**
+     * @dev Gets basic chapter info without choices (lighter version).
+     * @param _storyId The ID of the story.
+     * @param _chapterIndex The index of the chapter.
+     */
+    function getChapterBasicInfo(uint256 _storyId, uint256 _chapterIndex) external view storyExists(_storyId) chapterExists(_storyId, _chapterIndex) returns (
+        uint256 chapterId,
+        string memory ipfsHash,
+        uint256 createdAt,
+        uint256 voteEndTime,
+        uint256 winningChoiceIndex,
+        bool isResolved,
+        uint256 voteCountSum,
+        uint256 totalChoices
+    ) {
+        Chapter storage chapter = stories[_storyId].chapters[_chapterIndex];
+        return (
+            chapter.chapterId,
+            chapter.ipfsHash,
+            chapter.createdAt,
+            chapter.voteEndTime,
+            chapter.winningChoiceIndex,
+            chapter.isResolved,
+            chapter.voteCountSum,
+            chapter.choices.length
+        );
+    }
+
+    /**
+     * @dev Gets multiple stories' basic info at once (for listing pages).
+     * @param _startIndex Starting story ID.
+     * @param _count Number of stories to retrieve.
+     */
+    function getMultipleStoriesBasicInfo(uint256 _startIndex, uint256 _count) external view returns (
+        uint256[] memory storyIds,
+        string[] memory titles,
+        address[] memory writers,
+        StoryStatus[] memory statuses
+    ) {
+        uint256 totalStories = _storyIdCounter;
+        uint256 actualCount = _count;
+        
+        // Adjust count if it exceeds available stories
+        if (_startIndex + _count > totalStories) {
+            actualCount = totalStories > _startIndex ? totalStories - _startIndex : 0;
+        }
+        
+        storyIds = new uint256[](actualCount);
+        titles = new string[](actualCount);
+        writers = new address[](actualCount);
+        statuses = new StoryStatus[](actualCount);
+        
+        for (uint256 i = 0; i < actualCount; i++) {
+            uint256 storyId = _startIndex + i;
+            if (stories[storyId].writer != address(0)) { // Story exists
+                storyIds[i] = storyId;
+                titles[i] = stories[storyId].title;
+                writers[i] = stories[storyId].writer;
+                statuses[i] = stories[storyId].status;
+            }
+        }
+    }
+
+    /**
+     * @dev Checks if voting is currently active for a chapter.
+     * @param _storyId The ID of the story.
+     * @param _chapterIndex The index of the chapter.
+     */
+    function isChapterVotingActive(uint256 _storyId, uint256 _chapterIndex) external view storyExists(_storyId) chapterExists(_storyId, _chapterIndex) returns (bool) {
+        Story storage story = stories[_storyId];
+        Chapter storage chapter = story.chapters[_chapterIndex];
+        
+        return (
+            story.status == StoryStatus.ACTIVE &&
+            _chapterIndex == story.currentChapterIndex &&
+            !chapter.isResolved &&
+            block.timestamp < chapter.voteEndTime
+        );
+    }
+
+    function getVotingPeriods() external pure returns (uint256 proposalPeriod, uint256 chapterPeriod) {
+        return (PROPOSAL_VOTING_PERIOD, CHAPTER_VOTING_PERIOD);
     }
 }

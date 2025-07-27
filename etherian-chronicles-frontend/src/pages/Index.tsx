@@ -12,16 +12,14 @@ import StoryCard from "@/components/Story/StoryCard";
 import Header from "@/components/Layout/Header";
 import StorySlideshow from "@/components/Home/StorySlideshow";
 import ProposalsCarousel from "@/components/Home/ProposalsCarousel";
-import { mockStories } from "@/data/mockData";
-import { getActiveProposals } from "@/data/proposalData";
+import { getActiveProposals, getActiveStories } from "@/data/proposalData";
 import { useEffect, useState } from "react";
 
 const Index = () => {
-  const featuredStories = mockStories
-    .filter((story) => story.trending)
-    .slice(0, 4);
   const [activeProposals, setActiveProposals] = useState([]);
   const [isProposalLoading, setIsProposalLoading] = useState(false);
+  const [activeStories, setActiveStories] = useState([]);
+  const [isStoryLoading, setIsStoryLoading] = useState(false);
 
   useEffect(() => {
     const fetchProposals = async () => {
@@ -30,13 +28,32 @@ const Index = () => {
         await getActiveProposals();
       setActiveProposals(activeProposals);
       setIsProposalLoading(isLoading);
+    };
 
-      console.log("Active Proposals:", activeProposals);
-      console.log("Is Proposal Loading:", isLoading);
+    const fetchStories = async () => {
+      setIsStoryLoading(true);
+      const { activeStories, isStoryLoading } = await getActiveStories();
+      setActiveStories(activeStories);
+      setIsStoryLoading(isStoryLoading);
     };
 
     fetchProposals();
+    fetchStories();
   }, []);
+
+  const featuredStories = activeStories
+    .map((story) => {
+      const totalVotes = story.proposalYesVotes + story.proposalNoVotes || 0;
+      return {
+        ...story,
+        totalVotes,
+        isTrending: totalVotes > 0 && story.chapters.length > 0,
+      };
+    })
+    .filter((story) => {
+      return story.isTrending;
+    })
+    .slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,10 +63,12 @@ const Index = () => {
       <StorySlideshow stories={featuredStories} />
 
       {/* Proposals Carousel */}
-      <ProposalsCarousel
-        proposals={activeProposals}
-        isLoading={isProposalLoading}
-      />
+      {activeProposals.length > 0 && (
+        <ProposalsCarousel
+          proposals={activeProposals}
+          isLoading={isProposalLoading}
+        />
+      )}
 
       {/* Featured Stories */}
       <section className="py-16">
@@ -73,7 +92,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {featuredStories.map((story) => (
-              <StoryCard key={story.id} story={story} />
+              <StoryCard key={story.storyId} story={story} />
             ))}
           </div>
 
