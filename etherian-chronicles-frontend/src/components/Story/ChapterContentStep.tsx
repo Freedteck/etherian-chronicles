@@ -47,8 +47,6 @@ const ChapterContentStep = ({
   };
 
   const updateVotingOption = (text: string) => {
-    console.log(text);
-
     onUpdate({
       votingOptions: data.votingOptions.map((option) =>
         option === text ? text : option

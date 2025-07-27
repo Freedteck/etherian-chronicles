@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   ArrowLeft,
   Crown,
@@ -14,15 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Layout/Header";
 import { useToast } from "@/hooks/use-toast";
-import {
-  getActiveProposals,
-  getUserProposalVote,
-  resolveProposal,
-  voteOnProposal,
-} from "@/data/proposalData";
+import { getUserProposalVote, resolveProposal } from "@/data/proposalData";
 import { formatAddress, getTimeAgo, getTimeRemaining } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
 import ProposalLoading from "@/components/ui/proposalLoading";
+import { StoryDataContext } from "@/contexts/storyDataContext";
 
 const ProposalDetail = () => {
   const { id } = useParams();
@@ -30,31 +26,28 @@ const ProposalDetail = () => {
   const [hasVoted, setHasVoted] = useState(false);
   const [userVote, setUserVote] = useState(null);
   const [proposal, setProposal] = useState(null);
-  const [isProposalLoading, setIsProposalLoading] = useState(false);
+  const { proposals, isLoading, voteOnProposal, resolveStoryProposal } =
+    useContext(StoryDataContext);
   const account = useActiveAccount();
 
-  const fetchProposal = useCallback(async () => {
-    setIsProposalLoading(true);
-    const { activeProposals, isProposalLoading } = await getActiveProposals();
-    const currentProposal = activeProposals.find((p) => p.storyId === +id);
-    setProposal(currentProposal);
-
-    if (currentProposal) {
-      const userVoteOption = await getUserProposalVote(
-        currentProposal.storyId,
-        account?.address
-      );
-      setHasVoted(userVoteOption > 0);
-      setUserVote(userVoteOption);
-      setIsProposalLoading(isProposalLoading);
-    }
-  }, [id, account]);
-
   useEffect(() => {
-    fetchProposal();
-  }, [fetchProposal]);
+    const fetchData = async () => {
+      const currentProposal = proposals.find((p) => p.storyId === +id);
+      setProposal(currentProposal);
 
-  if (isProposalLoading) {
+      if (currentProposal) {
+        const userVoteOption = await getUserProposalVote(
+          currentProposal.storyId,
+          account?.address
+        );
+        setHasVoted(userVoteOption > 0);
+        setUserVote(userVoteOption);
+      }
+    };
+    fetchData();
+  }, [id, account, proposals]);
+
+  if (isLoading) {
     return <ProposalLoading />;
   }
 
@@ -88,49 +81,34 @@ const ProposalDetail = () => {
       title: "Submitting your vote...",
       description: "Please wait while we process your vote.",
     });
-    const transactionHash = await voteOnProposal(
-      proposal.storyId,
-      voteType,
-      account // the account sending the transaction
-    );
-
-    if (toastResult.id) {
-      toastResult.dismiss();
-    }
-
+    const transactionHash = await voteOnProposal(proposal.storyId, voteType);
     if (transactionHash) {
       toast({
         variant: "success",
         title: "Vote submitted",
         description: `You voted ${
           voteType === 1 ? "For" : "Against"
-        } this proposal.`,
+        } the proposal.`,
       });
-
-      fetchProposal();
+      setHasVoted(true);
+      setUserVote(voteType);
     } else {
       toast({
         variant: "destructive",
         title: "Vote failed",
         description: "There was an error submitting your vote.",
       });
-
-      toastResult.dismiss();
     }
   };
 
   const handleResolve = async () => {
-    const transactionHash = await resolveProposal(
-      proposal.storyId,
-      account // the account sending the transaction
-    );
+    const transactionHash = await resolveStoryProposal(proposal.storyId);
     if (transactionHash) {
       toast({
         variant: "success",
         title: "Proposal resolved",
         description: "The proposal has been resolved successfully.",
       });
-      fetchProposal();
     } else {
       toast({
         variant: "destructive",

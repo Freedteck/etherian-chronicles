@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   ArrowLeft,
   Crown,
@@ -19,16 +19,11 @@ import Header from "@/components/Layout/Header";
 import VotingInterface from "@/components/Story/VotingInterface";
 import AddChapterModal from "@/components/Story/AddChapterModal";
 import { useToast } from "@/hooks/use-toast";
-import { useActiveAccount } from "thirdweb/react";
-import {
-  getActiveProposals,
-  getActiveStories,
-  getVoteCastEvents,
-  resolveChapter,
-  voteOnChapter,
-} from "@/data/proposalData";
+import { Blobbie, useActiveAccount } from "thirdweb/react";
+import { getVoteCastEvents, resolveChapter } from "@/data/proposalData";
 import { formatAddress, getTimeAgo } from "@/lib/utils";
 import ProposalLoading from "@/components/ui/proposalLoading";
+import { StoryDataContext } from "@/contexts/storyDataContext";
 
 const StoryDetail = () => {
   const { id } = useParams();
@@ -37,39 +32,28 @@ const StoryDetail = () => {
   const [userVotes, setUserVotes] = useState({});
   const [showAddChapterModal, setShowAddChapterModal] = useState(false);
   const [story, setStory] = useState(null);
-  const [isStoryLoading, setIsStoryLoading] = useState(false);
   const account = useActiveAccount();
-
-  const fetchStory = useCallback(async () => {
-    setIsStoryLoading(true);
-    // TODO: Comment out this line and uncomment the next line when stories are ready
-    // const {
-    //   activeProposals: activeStories,
-    //   isProposalLoading: isStoryLoading,
-    // } = await getActiveProposals();
-    const { activeStories, isStoryLoading } = await getActiveStories();
-    const currentStory = activeStories.find((p) => p.storyId === +id);
-    setIsStoryLoading(isStoryLoading);
-
-    setStory(currentStory);
-
-    if (currentStory) {
-      const userVoteOption = await getVoteCastEvents();
-
-      setUserVotes(
-        userVoteOption.filter(
-          (vote) =>
-            vote.voter === account?.address && Number(vote.storyId) === +id
-        )
-      );
-    }
-  }, [id, account]);
+  const { isLoading, stories, voteOnChapter, addChapter, resolveStoryChapter } =
+    useContext(StoryDataContext);
 
   useEffect(() => {
+    const fetchStory = async () => {
+      const currentStory = stories.find((p) => p.storyId === +id);
+      setStory(currentStory);
+      if (currentStory) {
+        const userVoteOption = await getVoteCastEvents();
+        setUserVotes(
+          userVoteOption.filter(
+            (vote) =>
+              vote.voter === account?.address && Number(vote.storyId) === +id
+          )
+        );
+      }
+    };
     fetchStory();
-  }, [fetchStory]);
+  }, [id, account, stories]);
 
-  if (isStoryLoading) {
+  if (isLoading) {
     return <ProposalLoading />;
   }
 
@@ -92,17 +76,18 @@ const StoryDetail = () => {
     );
   }
 
-  const totalVotes = story.proposalYesVotes + story.proposalNoVotes;
-
+  const totalVotes = story.chapters.reduce(
+    (acc, chapter) => acc + chapter.voteCountSum,
+    0
+  );
   const currentChapter = story.chapters[currentChapterIndex];
 
-  const handleVote = (chapterId: number, choiceId: number) => {
+  const handleVote = async (chapterId: number, choiceId: number) => {
     console.log("Voting for choice:", choiceId);
-    const transactionHash = voteOnChapter(
+    const transactionHash = await voteOnChapter(
       story.storyId,
-      currentChapter.chapterId,
-      choiceId,
-      account
+      chapterId,
+      choiceId
     );
     console.log(`Vote cast successfully: ${transactionHash}`);
     toast({
@@ -126,10 +111,9 @@ const StoryDetail = () => {
       description: "Please wait while we resolve the chapter.",
     });
     try {
-      const transactionHash = await resolveChapter(
+      const transactionHash = await resolveStoryChapter(
         story.storyId,
-        currentChapter.chapterId,
-        account
+        currentChapter.chapterId
       );
       toast({
         title: "Chapter Resolved!",
@@ -146,7 +130,15 @@ const StoryDetail = () => {
     }
   };
 
-  const handleChapterAdded = () => {
+  const handleChapterAdded = async (formData) => {
+    toast({
+      title: "Adding Chapter",
+      description: "Please wait while we add your chapter.",
+    });
+
+    const transaction = await addChapter(story.storyId, formData);
+
+    console.log(`Chapter added successfully: ${transaction}`);
     toast({
       title: "Chapter Added!",
       description: "Your chapter has been added to the story.",
@@ -232,7 +224,7 @@ const StoryDetail = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                {isAuthorOrCollaborator && (
+                {isAuthorOrCollaborator && !currentChapter.isResolved && (
                   <Button className="btn-mystical" onClick={handleResolve}>
                     <BookOpen className="h-4 w-4 mr-2" />
                     Resolve Chapter
@@ -420,23 +412,28 @@ const StoryDetail = () => {
                   </div>
                 </div>
 
-                {story.collaborators.slice(0, 3).map((collaborator, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-2">
-                    <img
-                      src={collaborator?.avatar}
-                      alt={collaborator}
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div>
-                      <div className="text-sm font-medium">
-                        {formatAddress(collaborator)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Collaborator
+                {story.collaborators
+                  .filter((collab) => collab !== story.writer)
+                  .slice(0, 3)
+                  .map((collaborator, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-3 p-2"
+                    >
+                      <Blobbie
+                        address={collaborator}
+                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                      />
+                      <div>
+                        <div className="text-sm font-medium">
+                          {formatAddress(collaborator)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Collaborator
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
                 {story.collaborators.length > 3 && (
                   <div className="text-xs text-muted-foreground text-center pt-2">
@@ -469,7 +466,9 @@ const StoryDetail = () => {
                     Last Update
                   </span>
                   <span className="text-sm font-medium">
-                    {new Date(story.lastUpdate).toLocaleDateString()}
+                    {getTimeAgo(
+                      story.chapters[story.chapters.length - 1].createdAt
+                    )}
                   </span>
                 </div>
               </div>

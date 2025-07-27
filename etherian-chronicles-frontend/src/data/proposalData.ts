@@ -202,6 +202,25 @@ export const resolveChapter = async (
   }
 };
 
+export const addChapter = async (
+  storyId: number,
+  chapterData: any,
+  account: any
+) => {
+  const chapterDataValues = Object.values(chapterData);
+  try {
+    const transactionHash = await executeTransaction(
+      "addChapter",
+      [BigInt(storyId), ...chapterDataValues],
+      account
+    );
+    return transactionHash;
+  } catch (error) {
+    console.error("Error adding chapter:", error);
+    throw error;
+  }
+};
+
 // Events
 const getContractEvent = async (eventName: string) => {
   const myEvent = prepareEvent({

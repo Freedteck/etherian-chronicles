@@ -1,22 +1,23 @@
-import { useState } from 'react';
-import { X, BookOpen, Plus, Vote } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-
-interface VotingOption {
-  id: string;
-  text: string;
-}
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import { X, BookOpen, Plus, Vote } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChapterData {
   title: string;
   content: string;
-  votingOptions: VotingOption[];
+  votingOptions: string[];
 }
 
 interface ChapterErrors {
@@ -30,88 +31,93 @@ interface AddChapterModalProps {
   onClose: () => void;
   storyTitle: string;
   chapterNumber: number;
-  onChapterAdded: () => void;
+  onChapterAdded: (data: any) => void;
 }
 
-const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapterAdded }: AddChapterModalProps) => {
+const AddChapterModal = ({
+  isOpen,
+  onClose,
+  storyTitle,
+  chapterNumber,
+  onChapterAdded,
+}: AddChapterModalProps) => {
   const { toast } = useToast();
-  const [newOption, setNewOption] = useState('');
-  
+  const [newOption, setNewOption] = useState("");
+
   const [formData, setFormData] = useState<ChapterData>({
-    title: '',
-    content: '',
-    votingOptions: []
+    title: "",
+    content: "",
+    votingOptions: [],
   });
-  
+
   const [errors, setErrors] = useState<ChapterErrors>({});
 
   const validateForm = (): boolean => {
     const newErrors: ChapterErrors = {};
-    
+
     if (!formData.title.trim()) {
-      newErrors.title = 'Chapter title is required';
+      newErrors.title = "Chapter title is required";
     } else if (formData.title.length > 100) {
-      newErrors.title = 'Title must be less than 100 characters';
+      newErrors.title = "Title must be less than 100 characters";
     }
-    
+
     if (!formData.content.trim()) {
-      newErrors.content = 'Chapter content is required';
+      newErrors.content = "Chapter content is required";
     } else if (formData.content.length > 5000) {
-      newErrors.content = 'Content must be less than 5000 characters';
+      newErrors.content = "Content must be less than 5000 characters";
     }
-    
-    if (formData.votingOptions.length > 0 && formData.votingOptions.length < 2) {
-      newErrors.votingOptions = 'If adding voting options, minimum 2 are required';
+
+    if (
+      formData.votingOptions.length > 0 &&
+      formData.votingOptions.length < 2
+    ) {
+      newErrors.votingOptions =
+        "If adding voting options, minimum 2 are required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
-      toast({
-        title: "Chapter Added!",
-        description: `Chapter ${chapterNumber}: "${formData.title}" has been added to the story.`,
-      });
-      
+
+      onChapterAdded(formData);
+
       // Reset form
-      setFormData({ title: '', content: '', votingOptions: [] });
-      setNewOption('');
-      onChapterAdded();
+      setFormData({ title: "", content: "", votingOptions: [] });
+      setNewOption("");
       onClose();
     }
   };
 
   const addVotingOption = () => {
     if (newOption.trim() && formData.votingOptions.length < 6) {
-      const newOptionObj = {
-        id: Date.now().toString(),
-        text: newOption.trim()
-      };
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        votingOptions: [...prev.votingOptions, newOptionObj]
+        votingOptions: [...prev.votingOptions, newOption.trim()],
       }));
-      setNewOption('');
+      setNewOption("");
     }
   };
 
-  const removeVotingOption = (id: string) => {
-    setFormData(prev => ({
+  const removeVotingOption = (voteOption: string) => {
+    setFormData((prev) => ({
       ...prev,
-      votingOptions: prev.votingOptions.filter(option => option.id !== id)
+      votingOptions: prev.votingOptions.filter(
+        (option) => option !== voteOption
+      ),
     }));
   };
 
-  const updateVotingOption = (id: string, text: string) => {
-    setFormData(prev => ({
+  const updateVotingOption = (text: string) => {
+    setFormData((prev) => ({
       ...prev,
-      votingOptions: prev.votingOptions.map(option => 
-        option.id === id ? { ...option, text } : option
-      )
+      votingOptions: prev.votingOptions.map((option) =>
+        option === text ? text : option
+      ),
     }));
   };
 
@@ -121,7 +127,9 @@ const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapter
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <BookOpen className="h-5 w-5" />
-            <span>Add Chapter {chapterNumber} to "{storyTitle}"</span>
+            <span>
+              Add Chapter {chapterNumber} to "{storyTitle}"
+            </span>
           </DialogTitle>
         </DialogHeader>
 
@@ -133,18 +141,24 @@ const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapter
               id="chapterTitle"
               placeholder="Enter chapter title..."
               value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
               aria-describedby={errors.title ? "title-error" : undefined}
               aria-invalid={!!errors.title}
             />
             {errors.title && (
-              <p id="title-error" className="text-sm text-destructive">{errors.title}</p>
+              <p id="title-error" className="text-sm text-destructive">
+                {errors.title}
+              </p>
             )}
           </div>
 
           {/* Chapter Content */}
           <div className="space-y-2">
-            <Label htmlFor="chapterContent">Chapter Content * (max 5000 characters)</Label>
+            <Label htmlFor="chapterContent">
+              Chapter Content * (max 5000 characters)
+            </Label>
             <Textarea
               id="chapterContent"
               placeholder="Write your chapter content here..."
@@ -152,15 +166,21 @@ const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapter
               maxLength={5000}
               className="text-base leading-relaxed"
               value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              aria-describedby={`content-count ${errors.content ? "content-error" : ""}`.trim()}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, content: e.target.value }))
+              }
+              aria-describedby={`content-count ${
+                errors.content ? "content-error" : ""
+              }`.trim()}
               aria-invalid={!!errors.content}
             />
             <p id="content-count" className="text-sm text-muted-foreground">
               {formData.content.length}/5000 characters
             </p>
             {errors.content && (
-              <p id="content-error" className="text-sm text-destructive">{errors.content}</p>
+              <p id="content-error" className="text-sm text-destructive">
+                {errors.content}
+              </p>
             )}
           </div>
 
@@ -170,22 +190,26 @@ const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapter
               <Vote className="h-4 w-4 text-accent" />
               <Label>Voting Options (Optional)</Label>
             </div>
-            
+
             <p className="text-sm text-muted-foreground">
-              Add options for readers to vote on what happens next. If you add options, you need at least 2.
+              Add options for readers to vote on what happens next. If you add
+              options, you need at least 2.
             </p>
 
             {/* Current Options */}
             {formData.votingOptions.length > 0 && (
               <div className="space-y-3">
                 {formData.votingOptions.map((option, index) => (
-                  <div key={option.id} className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                  <div
+                    key={option}
+                    className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg"
+                  >
                     <Badge variant="outline" className="text-xs">
                       Option {String.fromCharCode(65 + index)}
                     </Badge>
                     <Input
-                      value={option.text}
-                      onChange={(e) => updateVotingOption(option.id, e.target.value)}
+                      value={option}
+                      onChange={(e) => updateVotingOption(e.target.value)}
                       placeholder="Enter voting option..."
                       className="flex-1"
                     />
@@ -193,7 +217,7 @@ const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapter
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => removeVotingOption(option.id)}
+                      onClick={() => removeVotingOption(option)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -210,7 +234,7 @@ const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapter
                   onChange={(e) => setNewOption(e.target.value)}
                   placeholder="Enter a path readers can choose..."
                   className="flex-1"
-                  onKeyPress={(e) => e.key === 'Enter' && addVotingOption()}
+                  onKeyPress={(e) => e.key === "Enter" && addVotingOption()}
                 />
                 <Button
                   type="button"
@@ -231,18 +255,15 @@ const AddChapterModal = ({ isOpen, onClose, storyTitle, chapterNumber, onChapter
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-end pt-4 border-t">
-            <Button 
+            <Button
               type="button"
-              variant="outline" 
+              variant="outline"
               onClick={onClose}
               className="order-2 sm:order-1"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit"
-              className="btn-mystical order-1 sm:order-2"
-            >
+            <Button type="submit" className="btn-mystical order-1 sm:order-2">
               <Plus className="h-4 w-4 mr-2" />
               Add Chapter
             </Button>

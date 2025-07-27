@@ -38,7 +38,7 @@ const StorySlideshow = ({ stories }) => {
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src={currentStory.ipfsHashImage}
+          src={currentStory?.ipfsHashImage}
           alt={currentStory.title}
           className="w-full h-full object-cover opacity-20"
         />
@@ -87,7 +87,7 @@ const StorySlideshow = ({ stories }) => {
               ))}
             </div>
 
-            <Link to={`/stories/${currentStory.id}`}>
+            <Link to={`/stories/${currentStory.storyId}`}>
               <Button size="lg" className="btn-mystical">
                 Read Story
               </Button>

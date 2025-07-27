@@ -1,32 +1,19 @@
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Vote, Filter, Search, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Header from "@/components/Layout/Header";
 import PageBanner from "@/components/Layout/PageBanner";
 import ProposalCard from "@/components/Proposal/ProposalCard";
-import { getActiveProposals } from "@/data/proposalData";
 import CardLoading from "@/components/ui/cardLoaing";
+import { StoryDataContext } from "@/contexts/storyDataContext";
 
 const Proposals = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
-  const [activeProposals, setActiveProposals] = useState([]);
-  const [isProposalLoading, setIsProposalLoading] = useState(false);
+  const { proposals, isLoading } = useContext(StoryDataContext);
 
-  useEffect(() => {
-    const fetchProposals = async () => {
-      setIsProposalLoading(true);
-      const { activeProposals, isProposalLoading: isLoading } =
-        await getActiveProposals();
-      setActiveProposals(activeProposals);
-      setIsProposalLoading(isLoading);
-    };
-
-    fetchProposals();
-  }, []);
-
-  const filteredProposals = activeProposals.filter((proposal) => {
+  const filteredProposals = proposals.filter((proposal) => {
     const matchesSearch =
       proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       proposal.summary.toLowerCase().includes(searchTerm.toLowerCase());
@@ -80,7 +67,7 @@ const Proposals = () => {
 
         {/* Proposals Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isProposalLoading ? (
+          {isLoading ? (
             <CardLoading />
           ) : (
             filteredProposals.map((proposal) => (

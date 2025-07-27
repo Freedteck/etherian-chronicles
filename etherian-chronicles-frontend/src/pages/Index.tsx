@@ -12,36 +12,13 @@ import StoryCard from "@/components/Story/StoryCard";
 import Header from "@/components/Layout/Header";
 import StorySlideshow from "@/components/Home/StorySlideshow";
 import ProposalsCarousel from "@/components/Home/ProposalsCarousel";
-import { getActiveProposals, getActiveStories } from "@/data/proposalData";
-import { useEffect, useState } from "react";
+import { useContext } from "react";
+import { StoryDataContext } from "@/contexts/storyDataContext";
 
 const Index = () => {
-  const [activeProposals, setActiveProposals] = useState([]);
-  const [isProposalLoading, setIsProposalLoading] = useState(false);
-  const [activeStories, setActiveStories] = useState([]);
-  const [isStoryLoading, setIsStoryLoading] = useState(false);
+  const { isLoading, stories, proposals } = useContext(StoryDataContext);
 
-  useEffect(() => {
-    const fetchProposals = async () => {
-      setIsProposalLoading(true);
-      const { activeProposals, isProposalLoading: isLoading } =
-        await getActiveProposals();
-      setActiveProposals(activeProposals);
-      setIsProposalLoading(isLoading);
-    };
-
-    const fetchStories = async () => {
-      setIsStoryLoading(true);
-      const { activeStories, isStoryLoading } = await getActiveStories();
-      setActiveStories(activeStories);
-      setIsStoryLoading(isStoryLoading);
-    };
-
-    fetchProposals();
-    fetchStories();
-  }, []);
-
-  const featuredStories = activeStories
+  const featuredStories = stories
     .map((story) => {
       const totalVotes = story.proposalYesVotes + story.proposalNoVotes || 0;
       return {
@@ -63,11 +40,8 @@ const Index = () => {
       <StorySlideshow stories={featuredStories} />
 
       {/* Proposals Carousel */}
-      {activeProposals.length > 0 && (
-        <ProposalsCarousel
-          proposals={activeProposals}
-          isLoading={isProposalLoading}
-        />
+      {proposals.length > 0 && (
+        <ProposalsCarousel proposals={proposals} isLoading={isLoading} />
       )}
 
       {/* Featured Stories */}

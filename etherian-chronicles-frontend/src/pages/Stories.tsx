@@ -1,36 +1,18 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Search, BookOpen, TrendingUp, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import StoryCard from "@/components/Story/StoryCard";
 import Header from "@/components/Layout/Header";
 import PageBanner from "@/components/Layout/PageBanner";
-import { mockStories } from "@/data/mockData";
-import { getActiveProposals, getActiveStories } from "@/data/proposalData";
 import CardLoading from "@/components/ui/cardLoaing";
+import { StoryDataContext } from "@/contexts/storyDataContext";
 
 const Stories = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [sortBy, setSortBy] = useState("trending");
-  const [activeStories, setActiveStories] = useState([]);
-  const [isStoryLoading, setIsStoryLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchProposals = async () => {
-      setIsStoryLoading(true);
-      // TODO: Comment out this line and uncomment the next line when stories are ready
-      // const { activeProposals, isProposalLoading: isLoading } =
-      //   await getActiveProposals();
-
-      const { activeStories, isStoryLoading: isLoading } =
-        await getActiveStories();
-      setActiveStories(activeStories);
-      setIsStoryLoading(isLoading);
-    };
-
-    fetchProposals();
-  }, []);
+  const { stories, isLoading } = useContext(StoryDataContext);
 
   const allGenres = [
     "all",
@@ -42,7 +24,7 @@ const Stories = () => {
     "Technology",
   ];
 
-  const filteredStories = activeStories.filter((story) => {
+  const filteredStories = stories.filter((story) => {
     const matchesSearch =
       story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       story.summary.toLowerCase().includes(searchTerm.toLowerCase());
@@ -143,14 +125,14 @@ const Stories = () => {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
-            Showing {sortedStories.length} of {activeStories.length} stories
+            Showing {sortedStories.length} of {stories.length} stories
           </p>
         </div>
 
         {/* Stories Grid */}
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isStoryLoading ? (
+          {isLoading ? (
             <CardLoading />
           ) : sortedStories.length > 0 ? (
             sortedStories.map((story) => (

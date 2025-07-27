@@ -157,7 +157,7 @@ const VotingInterface = ({ chapter, onVote, userVote = null }) => {
               </div>
 
               {/* Vote Button for Open Voting */}
-              {isVotingOpen && (
+              {isVotingOpen && selectedChoice && (
                 <div className="mt-3">
                   <Button
                     variant={isSelected ? "default" : "outline"}
