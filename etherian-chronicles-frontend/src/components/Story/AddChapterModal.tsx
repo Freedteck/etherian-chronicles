@@ -79,12 +79,11 @@ const AddChapterModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-
-      onChapterAdded(formData);
+      await onChapterAdded(formData);
 
       // Reset form
       setFormData({ title: "", content: "", votingOptions: [] });
