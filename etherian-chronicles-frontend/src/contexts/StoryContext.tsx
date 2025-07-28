@@ -139,6 +139,7 @@ const StoryContext = ({ children }) => {
     try {
       const transactionHash = await resolveProposal(storyId, account);
       await getProposals(); // Refresh proposals after resolving
+      await getStories(); // Refresh stories after resolving
       return transactionHash;
     } catch (error) {
       console.error("Error resolving proposal:", error);

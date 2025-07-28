@@ -15,9 +15,9 @@ const Proposals = () => {
 
   const filteredProposals = proposals.filter((proposal) => {
     const matchesSearch =
-      proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposal.summary.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === "all" || proposal.status === filter;
+      proposal?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      proposal?.summary.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filter === "all" || proposal?.status === filter;
     return matchesSearch && matchesFilter;
   });
 
@@ -71,7 +71,7 @@ const Proposals = () => {
             <CardLoading />
           ) : (
             filteredProposals.map((proposal) => (
-              <ProposalCard key={proposal.storyId} proposal={proposal} />
+              <ProposalCard key={proposal?.storyId} proposal={proposal} />
             ))
           )}
         </div>

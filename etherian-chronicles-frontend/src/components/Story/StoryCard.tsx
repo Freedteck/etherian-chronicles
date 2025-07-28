@@ -4,18 +4,20 @@ import { Badge } from "@/components/ui/badge";
 import { formatAddress, getTimeAgo } from "@/lib/utils";
 
 const StoryCard = ({ story, className = "" }) => {
-  const totalVotes = story.proposalYesVotes + story.proposalNoVotes || 0;
+  const totalVotes =
+    story?.chapters?.reduce((acc, chapter) => acc + chapter?.voteCountSum, 0) ||
+    0;
   story.trending = totalVotes >= 2;
   return (
     <Link
-      to={`/stories/${story.storyId}`}
+      to={`/stories/${story?.storyId}`}
       className={`story-card block hover:shadow-lg transition-all duration-300 hover:scale-[1.02] bg-card border border-border rounded-xl overflow-hidden ${className}`}
     >
       {/* Cover Image */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={story.ipfsHashImage}
-          alt={story.title}
+          src={story?.ipfsHashImage}
+          alt={story?.title}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -26,16 +28,16 @@ const StoryCard = ({ story, className = "" }) => {
             variant="secondary"
             className="bg-primary/90 text-white border-0"
           >
-            {story.status === 1
+            {story?.status === 1
               ? "Active"
-              : story.status === 3
+              : story?.status === 3
               ? "Completed"
               : "Paused"}
           </Badge>
         </div>
 
         {/* Trending Badge */}
-        {story.trending && (
+        {story?.trending && (
           <div className="absolute top-3 right-3">
             <Badge
               variant="secondary"
@@ -53,29 +55,29 @@ const StoryCard = ({ story, className = "" }) => {
         {/* Title and Creator */}
         <div className="mb-3">
           <h3 className="text-lg font-display font-semibold text-foreground mb-1 line-clamp-2">
-            {story.title}
+            {story?.title}
           </h3>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Crown className="h-3 w-3" />
-            <span>by {formatAddress(story.writer)}</span>
+            <span>by {formatAddress(story?.writer)}</span>
           </div>
         </div>
 
         {/* Summary */}
         <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-          {story.summary}
+          {story?.summary}
         </p>
 
         {/* Genre Tags */}
         <div className="flex flex-wrap gap-1 mb-4">
-          {story.chapters[0].genres.slice(0, 2).map((genre) => (
+          {story?.chapters[0].genres.slice(0, 2).map((genre) => (
             <Badge key={genre} variant="outline" className="text-xs">
               {genre}
             </Badge>
           ))}
-          {story.chapters[0].genres.length > 2 && (
+          {story?.chapters[0].genres.length > 2 && (
             <Badge variant="outline" className="text-xs">
-              +{story.chapters[0].genres.length - 2}
+              +{story?.chapters[0].genres.length - 2}
             </Badge>
           )}
         </div>
@@ -89,11 +91,11 @@ const StoryCard = ({ story, className = "" }) => {
             </div>
             <div className="flex items-center space-x-1">
               <BookOpen className="h-3 w-3" />
-              <span>{story.collaborators.length + 1} authors</span>
+              <span>{story?.collaborators.length + 1} authors</span>
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="h-3 w-3" />
-              <span>{getTimeAgo(story.createdAt)}</span>
+              <span>{getTimeAgo(story?.createdAt)}</span>
             </div>
           </div>
         </div>

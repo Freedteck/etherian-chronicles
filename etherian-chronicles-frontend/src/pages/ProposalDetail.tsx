@@ -37,7 +37,7 @@ const ProposalDetail = () => {
 
       if (currentProposal) {
         const userVoteOption = await getUserProposalVote(
-          currentProposal.storyId,
+          currentProposal?.storyId,
           account?.address
         );
         setHasVoted(userVoteOption > 0);
@@ -70,9 +70,9 @@ const ProposalDetail = () => {
     );
   }
 
-  const totalVotes = proposal.proposalYesVotes + proposal.proposalNoVotes;
+  const totalVotes = proposal?.proposalYesVotes + proposal?.proposalNoVotes;
   const approvalPercentage =
-    totalVotes > 0 ? (proposal.proposalYesVotes / totalVotes) * 100 : 0;
+    totalVotes > 0 ? (proposal?.proposalYesVotes / totalVotes) * 100 : 0;
 
   const handleVote = async (voteType) => {
     if (hasVoted) return;
@@ -81,7 +81,7 @@ const ProposalDetail = () => {
       title: "Submitting your vote...",
       description: "Please wait while we process your vote.",
     });
-    const transactionHash = await voteOnProposal(proposal.storyId, voteType);
+    const transactionHash = await voteOnProposal(proposal?.storyId, voteType);
     if (transactionHash) {
       toast({
         variant: "success",
@@ -102,7 +102,7 @@ const ProposalDetail = () => {
   };
 
   const handleResolve = async () => {
-    const transactionHash = await resolveStoryProposal(proposal.storyId);
+    const transactionHash = await resolveStoryProposal(proposal?.storyId);
     if (transactionHash) {
       toast({
         variant: "success",
@@ -148,8 +148,8 @@ const ProposalDetail = () => {
             <div className="lg:w-1/3">
               <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
                 <img
-                  src={proposal.ipfsHashImage}
-                  alt={proposal.title}
+                  src={proposal?.ipfsHashImage}
+                  alt={proposal?.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -158,19 +158,19 @@ const ProposalDetail = () => {
                 <div className="absolute top-4 left-4">
                   <Badge
                     className={
-                      proposal.status === 0 ? "bg-primary" : "bg-muted"
+                      proposal?.status === 0 ? "bg-primary" : "bg-muted"
                     }
                   >
-                    {proposal.status === 0 ? "Voting Open" : "Voting Closed"}
+                    {proposal?.status === 0 ? "Voting Open" : "Voting Closed"}
                   </Badge>
                 </div>
 
                 {/* Time Left */}
-                {proposal.status === 0 && (
+                {proposal?.status === 0 && (
                   <div className="absolute top-4 right-4">
                     <Badge variant="outline" className="bg-background/90">
                       <Clock className="h-3 w-3 mr-1" />
-                      {getTimeRemaining(proposal.proposalVoteEndTime)}
+                      {getTimeRemaining(proposal?.proposalVoteEndTime)}
                     </Badge>
                   </div>
                 )}
@@ -180,27 +180,27 @@ const ProposalDetail = () => {
             {/* Proposal Info */}
             <div className="lg:w-2/3">
               <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-                {proposal.title}
+                {proposal?.title}
               </h1>
 
               <div className="flex items-center space-x-4 mb-4 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-1">
                   <Crown className="h-4 w-4" />
-                  <span>by {formatAddress(proposal.writer)}</span>
+                  <span>by {formatAddress(proposal?.writer)}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
-                  <span>Proposed {getTimeAgo(proposal.createdAt)}</span>
+                  <span>Proposed {getTimeAgo(proposal?.createdAt)}</span>
                 </div>
               </div>
 
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                {proposal.summary}
+                {proposal?.summary}
               </p>
 
               {/* Genre Tags */}
               <div className="flex flex-wrap gap-2 mb-6">
-                {proposal.chapters[0].genres.map((genre) => (
+                {proposal?.chapters[0]?.genres?.map((genre) => (
                   <Badge key={genre} variant="outline">
                     {genre}
                   </Badge>
@@ -219,14 +219,14 @@ const ProposalDetail = () => {
                       <div className="flex items-center space-x-2">
                         <ThumbsUp className="h-4 w-4 text-primary" />
                         <span className="font-semibold">
-                          {proposal.proposalYesVotes}
+                          {proposal?.proposalYesVotes}
                         </span>
                         <span className="text-muted-foreground">For</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <ThumbsDown className="h-4 w-4 text-destructive" />
                         <span className="font-semibold">
-                          {proposal.proposalNoVotes}
+                          {proposal?.proposalNoVotes}
                         </span>
                         <span className="text-muted-foreground">Against</span>
                       </div>
@@ -247,7 +247,7 @@ const ProposalDetail = () => {
               </div>
 
               {/* Action Buttons */}
-              {proposal.status === 0 && !hasVoted ? (
+              {proposal?.status === 0 && !hasVoted ? (
                 <div className="flex flex-wrap gap-3 mb-4">
                   <Button
                     className="btn-mystical"
@@ -295,18 +295,18 @@ const ProposalDetail = () => {
             First Chapter Preview
           </h2>
           <h3 className="text-lg font-semibold mb-4">
-            {proposal.chapters[0].title}
+            {proposal?.chapters[0].title}
           </h3>
 
           <div className="prose prose-lg max-w-none mb-6">
             <p className="text-foreground leading-relaxed">
-              {proposal.chapters[0].content}
+              {proposal?.chapters[0].content}
             </p>
           </div>
 
           <div className="space-y-3">
             <h4 className="font-semibold">Potential Choices:</h4>
-            {proposal.chapters[0].choices.map((choice, index) => (
+            {proposal?.chapters[0].choices.map((choice, index) => (
               <div
                 key={index}
                 className="p-3 bg-muted/30 rounded-lg border border-border"

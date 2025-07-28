@@ -65,8 +65,8 @@ const ProposalsCarousel = ({ proposals, isLoading }) => {
           {isLoading ? (
             <CardLoading />
           ) : (
-            proposals.map((proposal) => (
-              <div key={proposal.storyId} className="flex-none w-80 min-w-80">
+            proposals?.map((proposal) => (
+              <div key={proposal?.storyId} className="flex-none w-80 min-w-80">
                 <ProposalCard proposal={proposal} />
               </div>
             ))

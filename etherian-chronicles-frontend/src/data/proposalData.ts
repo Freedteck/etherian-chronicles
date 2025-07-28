@@ -75,7 +75,7 @@ export const getActiveStories = async () => {
 export const getActiveProposals = async () => {
   const { stories: proposals, isStoryLoading: isProposalLoading } =
     await getStories();
-  const activeProposals = proposals.filter((proposal) => proposal.status === 0);
+  const activeProposals = proposals.filter((proposal) => proposal?.status === 0);
   return { activeProposals, isProposalLoading };
 };
 

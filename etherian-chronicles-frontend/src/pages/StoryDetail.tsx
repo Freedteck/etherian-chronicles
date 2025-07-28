@@ -206,7 +206,7 @@ const StoryDetail = () => {
               <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm mb-4">
                 <div className="flex items-center space-x-1">
                   <Crown className="h-4 w-4" />
-                  <span>by {formatAddress(story.writer)}</span>
+                  <span>by {formatAddress(story?.writer)}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Users className="h-4 w-4" />
@@ -404,7 +404,7 @@ const StoryDetail = () => {
                   </div>
                   <div>
                     <div className="text-sm font-medium">
-                      {formatAddress(story.writer)}
+                      {formatAddress(story?.writer)}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       Story Creator
@@ -412,8 +412,8 @@ const StoryDetail = () => {
                   </div>
                 </div>
 
-                {story.collaborators
-                  .filter((collab) => collab !== story.writer)
+                {story?.collaborators
+                  .filter((collab) => collab !== story?.writer)
                   .slice(0, 3)
                   .map((collaborator, index) => (
                     <div

@@ -58,7 +58,8 @@ export const getIpfsDetails = async (ipfsUrl: string) => {
   return data;
 };
 
-export const formatAddress = (address: string) => {
+export const formatAddress = (address?: string) => {
+  if (!address) return "";
   const formattedAddress = checksumAddress(address);
   return `${formattedAddress.slice(0, 6)}...${formattedAddress.slice(-4)}`;
 };

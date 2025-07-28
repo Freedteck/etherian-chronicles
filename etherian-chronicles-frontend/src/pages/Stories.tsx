@@ -30,7 +30,7 @@ const Stories = () => {
       story.summary.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGenre =
       selectedGenre === "all" ||
-      story.chapters[0].genres.includes(selectedGenre);
+      story.chapters[0]?.genres?.includes(selectedGenre);
     return matchesSearch && matchesGenre;
   });
 

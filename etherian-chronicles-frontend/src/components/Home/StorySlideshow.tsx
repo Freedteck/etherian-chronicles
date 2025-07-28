@@ -39,7 +39,7 @@ const StorySlideshow = ({ stories }) => {
       <div className="absolute inset-0">
         <img
           src={currentStory?.ipfsHashImage}
-          alt={currentStory.title}
+          alt={currentStory?.title}
           className="w-full h-full object-cover opacity-20"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
@@ -51,7 +51,7 @@ const StorySlideshow = ({ stories }) => {
           <div className="text-center max-w-4xl mx-auto">
             <div className="flex items-center justify-center space-x-2 mb-6">
               <Badge className="bg-primary/90 text-white">Featured Story</Badge>
-              {currentStory.isTrending && (
+              {currentStory?.isTrending && (
                 <Badge variant="secondary" className="bg-secondary/90">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   Trending
@@ -60,34 +60,34 @@ const StorySlideshow = ({ stories }) => {
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-display font-bold text-gradient-mystical mb-6 leading-tight">
-              {currentStory.title}
+              {currentStory?.title}
             </h1>
 
             <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground mb-6">
               <div className="flex items-center space-x-1">
                 <Crown className="h-4 w-4" />
-                <span>by {formatAddress(currentStory.writer)}</span>
+                <span>by {formatAddress(currentStory?.writer)}</span>
               </div>
               <span>•</span>
               <div className="flex items-center space-x-1">
                 <Users className="h-4 w-4" />
-                <span>{currentStory.totalVotes} votes</span>
+                <span>{currentStory?.totalVotes} votes</span>
               </div>
             </div>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-2xl mx-auto">
-              {currentStory.summary}
+              {currentStory?.summary}
             </p>
 
             <div className="flex flex-wrap gap-2 justify-center mb-8">
-              {currentStory.chapters[0].genres.slice(0, 3).map((genre) => (
+              {currentStory?.chapters[0].genres.slice(0, 3).map((genre) => (
                 <Badge key={genre} variant="outline">
                   {genre}
                 </Badge>
               ))}
             </div>
 
-            <Link to={`/stories/${currentStory.storyId}`}>
+            <Link to={`/stories/${currentStory?.storyId}`}>
               <Button size="lg" className="btn-mystical">
                 Read Story
               </Button>

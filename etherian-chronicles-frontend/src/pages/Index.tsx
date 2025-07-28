@@ -20,15 +20,15 @@ const Index = () => {
 
   const featuredStories = stories
     .map((story) => {
-      const totalVotes = story.proposalYesVotes + story.proposalNoVotes || 0;
+      const totalVotes = story?.proposalYesVotes + story?.proposalNoVotes || 0;
       return {
         ...story,
         totalVotes,
-        isTrending: totalVotes > 0 && story.chapters.length > 0,
+        isTrending: totalVotes > 0 && story?.chapters.length > 0,
       };
     })
     .filter((story) => {
-      return story.isTrending;
+      return story?.isTrending;
     })
     .slice(0, 4);
 
@@ -66,7 +66,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {featuredStories.map((story) => (
-              <StoryCard key={story.storyId} story={story} />
+              <StoryCard key={story?.storyId} story={story} />
             ))}
           </div>
 
