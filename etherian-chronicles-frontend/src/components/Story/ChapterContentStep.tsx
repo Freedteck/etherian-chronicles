@@ -13,6 +13,8 @@ interface ChapterContentStepProps {
     chapterTitle: string;
     firstChapter: string;
     votingOptions: string[];
+    isLastChapter?: boolean;
+    votingQuestion?: string;
   };
   errors: {
     chapterTitle?: string;
@@ -119,7 +121,29 @@ const ChapterContentStep = ({
         </div>
       </Card>
 
+      <Card className="p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+          <Vote className="h-5 w-5 text-secondary" />
+          </div>
+          <h2 className="text-xl font-display font-bold">Chapter Settings</h2>
+
+        </div>
+
+        <div className="space-y-6">
+          <div className=" flex items-center space-x-3">
+            <input type="checkbox" id="isLastChapter" checked={data.isLastChapter || false} 
+            onChange={(e)=> onUpdate({isLastChapter: e.target.checked})} />
+             <Label htmlFor="isLastChapter">This is the last chapter</Label>
+
+          </div>
+
+        </div>
+      </Card>
+
       {/* Voting Options */}
+      {!data.isLastChapter &&(
+
       <Card className="p-8">
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
@@ -128,11 +152,17 @@ const ChapterContentStep = ({
           <h2 className="text-xl font-display font-bold">Voting Options</h2>
         </div>
 
-        <div className="space-y-6">
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-6 ">
+          <p  >
             Add voting options to let readers choose the story's direction. This
             is optional, but if you add options, you need at least 2.
           </p>
+
+          <div className="space-y-2" >
+            <label htmlFor="VotingQuestion" >Ask your readers a question</label>
+            <Input type="text" id="VotingQuestion" placeholder="What should happen next?" value={data.votingQuestion || ""} onChange={(e)=> onUpdate({votingQuestion: e.target.value})}   required/>
+
+          </div>
 
           {/* Current Options */}
           {data.votingOptions.length > 0 && (
@@ -201,6 +231,7 @@ const ChapterContentStep = ({
           )}
         </div>
       </Card>
+      )}
     </div>
   );
 };
