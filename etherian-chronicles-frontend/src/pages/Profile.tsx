@@ -17,6 +17,7 @@ import PageBanner from "@/components/Layout/PageBanner";
 import { StoryDataContext } from "@/contexts/storyDataContext";
 import { Blobbie, useActiveAccount } from "thirdweb/react";
 import { formatAddress, getTimeAgo } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { stories } = useContext(StoryDataContext);
@@ -25,6 +26,7 @@ const Profile = () => {
   const currentUser = account?.address?.toLowerCase();
 
   const [activeTab, setActiveTab] = useState("overview");
+  const navigate = useNavigate();
 
   // Tabs definition
   const tabs = [
@@ -264,7 +266,10 @@ const Profile = () => {
                 <p className="text-muted-foreground mb-4">
                   Start your storytelling journey by creating your first tale
                 </p>
-                <Button className="btn-mystical">
+                <Button
+                  className="btn-mystical"
+                  onClick={() => navigate("/create")}
+                >
                   <Crown className="h-4 w-4 mr-2" />
                   Create Your First Story
                 </Button>

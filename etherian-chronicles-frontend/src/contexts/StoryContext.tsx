@@ -66,6 +66,7 @@ const StoryContext = ({ children }) => {
       };
 
       const transactionHash = await createStory(storyData, account);
+      await getStories();
       await getProposals(); // Refresh proposals after adding a new one
       return transactionHash;
     } catch (error) {

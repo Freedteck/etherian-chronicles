@@ -136,7 +136,7 @@ const StoryDetail = () => {
       description: "Please wait while we add your chapter.",
     });
 
-    const transaction = await addChapter(story.storyId, formData);
+    const transaction = await addChapter(story, formData);
 
     console.log(`Chapter added successfully: ${transaction}`);
     toast({
