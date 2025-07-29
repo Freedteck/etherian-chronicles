@@ -10,6 +10,7 @@ import CollaboratorsStep from "./CollaboratorsStep";
 import { uploadJsonToPinata } from "@/lib/pinata";
 import { createStory } from "@/data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
+import { boolToBytes } from "thirdweb";
 
 interface Collaborator {
   id: string;
@@ -24,9 +25,12 @@ interface FormData {
   genres: string[];
   chapterTitle: string;
   firstChapter: string;
+  votingQuestion?: string;
   votingOptions: string[];
   collaborators: Collaborator[];
+  isLastChapter?: boolean;
 }
+
 
 interface FormErrors {
   title?: string;
@@ -35,6 +39,7 @@ interface FormErrors {
   chapterTitle?: string;
   coverImage?: string;
   genres?: string;
+
   votingOptions?: string;
   collaborators?: string;
 }
@@ -68,6 +73,8 @@ const CreateStoryForm = () => {
     firstChapter: "",
     votingOptions: [],
     collaborators: [],
+    isLastChapter: false,
+    votingQuestion: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
