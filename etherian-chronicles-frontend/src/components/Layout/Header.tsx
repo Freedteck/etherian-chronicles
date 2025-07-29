@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
 import { client, wallets } from "@/lib/utils";
 import { etherlinkTestnet } from "thirdweb/chains";
+import ThemeToggle from "../ui/ThemeToggle";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,6 +61,7 @@ const Header = () => {
               </Link>
             )}
           </nav>
+          <ThemeToggle />
 
           {/* Connect Button */}
           <div className="hidden md:flex items-center space-x-4">
