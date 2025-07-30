@@ -11,6 +11,8 @@ import { uploadJsonToPinata } from "@/lib/pinata";
 import { createStory } from "@/data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
 import { boolToBytes } from "thirdweb";
+import { createProposal } from "@/lib/utils";
+import abi from "../../../abi.json";
 
 interface Collaborator {
   id: string;
@@ -30,7 +32,6 @@ interface FormData {
   collaborators: Collaborator[];
   isLastChapter?: boolean;
 }
-
 
 interface FormErrors {
   title?: string;
@@ -188,7 +189,9 @@ const CreateStoryForm = () => {
           _collaborators: formData.collaborators.map((c) => c.address),
         };
 
-        const transactionHash = await createStory(storyData, account);
+        const transactionHash = await createProposal(storyData);
+
+        // const transactionHash = await createStory(storyData, account);
 
         if (loadingToastId) {
           toastResult.dismiss();

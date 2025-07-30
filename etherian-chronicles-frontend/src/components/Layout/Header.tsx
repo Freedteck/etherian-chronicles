@@ -6,10 +6,14 @@ import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
 import { client, wallets } from "@/lib/utils";
 import { etherlinkTestnet } from "thirdweb/chains";
 import ThemeToggle from "../ui/ThemeToggle";
+import { useOpenConnectModal, useWallets } from "@0xsequence/connect";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const account = useActiveAccount();
+  const { setOpenConnectModal } = useOpenConnectModal();
+  const { disconnectWallet, wallets } = useWallets();
+  const activeWallet = wallets.find((wallet) => wallet.isActive);
 
   const navigation = [
     { name: "Stories", href: "/stories", icon: Book },
@@ -65,7 +69,21 @@ const Header = () => {
 
           {/* Connect Button */}
           <div className="hidden md:flex items-center space-x-4">
-            <ConnectButton
+            <Button
+              onClick={
+                activeWallet
+                  ? () => disconnectWallet(activeWallet.address)
+                  : () => setOpenConnectModal(true)
+              }
+            >
+              {activeWallet
+                ? `${activeWallet.address.slice(
+                    0,
+                    6
+                  )}...${activeWallet.address.slice(-4)}`
+                : "Connect Wallet"}
+            </Button>
+            {/* <ConnectButton
               client={client}
               wallets={wallets}
               accountAbstraction={{
@@ -85,7 +103,7 @@ const Header = () => {
                   primaryButtonText: "hsl(0, 0%, 100%)",
                 },
               })}
-            />
+            /> */}
           </div>
 
           {/* Mobile menu button */}

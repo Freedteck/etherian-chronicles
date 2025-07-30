@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { createThirdwebClient, getContract } from "thirdweb";
@@ -7,6 +8,59 @@ import CONTRACT_ADDRESS_JSON from "../deployed_addresses.json";
 import { EtherianChronicle__factory } from "@/typechain-types";
 import { checksumAddress } from "thirdweb/utils";
 import { format, fromUnixTime, formatDistanceToNow, isPast } from "date-fns";
+import { createConfig } from "@0xsequence/connect";
+import { SequenceWaaS } from "@0xsequence/waas";
+
+const projectAccessKey = import.meta.env.VITE_PROJECT_ACCESS_KEY;
+const waasConfigKey = import.meta.env.VITE_WAAS_CONFIG_KEY;
+const enableConfirmationModal = true; // change to your preference
+const walletConnectProjectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+
+export const config = createConfig("waas", {
+  projectAccessKey,
+  position: "center",
+  defaultTheme: "dark",
+  signIn: {
+    projectName: "Etherian Chronicle",
+  },
+  defaultChainId: 128123,
+  chainIds: [42793, 128123],
+  appName: "Etherian Chronicle",
+  waasConfigKey,
+  email: true,
+  google: { clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID },
+  apple: false,
+  walletConnect: {
+    projectId: walletConnectProjectId,
+  },
+  coinbase: false,
+  metaMask: true,
+  wagmiConfig: {
+    multiInjectedProviderDiscovery: true,
+  },
+  enableConfirmationModal,
+});
+
+export async function createProposal(data) {
+  const sequence = new SequenceWaaS({
+    projectAccessKey: import.meta.env.VITE_PROJECT_ACCESS_KEY,
+    waasConfigKey: import.meta.env.VITE_WAAS_CONFIG_KEY,
+    network: "etherlinkTestnet",
+  });
+
+  try {
+    const tx = await sequence.callContract({
+      to: CONTRACT_ADDRESS_JSON["EtherianChronicle#EtherianChronicle"], // Contract address
+      abi: EtherianChronicle__factory?.abi as any, // ABI
+      func: "createStoryProposal", // Function name
+      args: data,
+      value: 0, // Value to send
+    });
+    return tx;
+  } catch (e) {
+    console.log(e);
+  }
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
