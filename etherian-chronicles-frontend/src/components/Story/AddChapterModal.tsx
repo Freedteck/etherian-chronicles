@@ -13,11 +13,15 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Card } from "../ui/card";
 
 interface ChapterData {
   title: string;
   content: string;
   votingOptions: string[];
+  isLastChapter?: boolean;
+  votingQuestion?: string;
+  
 }
 
 interface ChapterErrors {
@@ -48,6 +52,8 @@ const AddChapterModal = ({
     title: "",
     content: "",
     votingOptions: [],
+    isLastChapter: false,
+    votingQuestion: "",
   });
 
   const [errors, setErrors] = useState<ChapterErrors>({});
@@ -183,7 +189,29 @@ const AddChapterModal = ({
             )}
           </div>
 
+          <Card className="p-8">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+                    <Vote className="h-5 w-5 text-secondary" />
+                    </div>
+                    <h2 className="text-xl font-display font-bold">Chapter Settings</h2>
+          
+                  </div>
+          
+                  <div className="space-y-6">
+                    <div className=" flex items-center space-x-3">
+                      <input type="checkbox" id="isLastChapter" checked={formData.isLastChapter || false} 
+                      onChange={(e)=> setFormData((prev) => ({ ...prev, isLastChapter: e.target.checked }))} />
+                       <Label htmlFor="isLastChapter">This is the last chapter</Label>
+          
+                    </div>
+          
+                  </div>
+                </Card>
+
           {/* Voting Options */}
+          {!formData.isLastChapter && (
+            
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Vote className="h-4 w-4 text-accent" />
@@ -251,6 +279,7 @@ const AddChapterModal = ({
               <p className="text-sm text-destructive">{errors.votingOptions}</p>
             )}
           </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-end pt-4 border-t">
