@@ -163,6 +163,8 @@ const CreateStoryForm = () => {
           content: formData.firstChapter,
           votingOptions: formData.votingOptions,
           genres: formData.genres,
+          votingQuestion: formData.votingQuestion,
+          isLastChapter: formData.isLastChapter || false,
         };
 
         const firstChapterIpfsUrl = await uploadJsonToPinata(firstChapter);
