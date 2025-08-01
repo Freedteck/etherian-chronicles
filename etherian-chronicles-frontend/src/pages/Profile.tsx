@@ -17,7 +17,7 @@ import PageBanner from "@/components/Layout/PageBanner";
 import { StoryDataContext } from "@/contexts/storyDataContext";
 import { Blobbie, useActiveAccount } from "thirdweb/react";
 import { formatAddress, getTimeAgo } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { stories } = useContext(StoryDataContext);
@@ -93,10 +93,18 @@ const Profile = () => {
                   Master storyteller crafting epic tales since{" "}
                   {new Date(11).getFullYear() || "2025"}
                 </p>
-                <Button variant="outline" size="sm">
-                  <Settings className="h-3 w-3 mr-2" />
-                  Edit Profile
-                </Button>
+                <div className="flex flex-row gap-4">
+                  <Button variant="outline" size="sm">
+                    <Settings className="h-3 w-3 mr-2" />
+                    Edit Profile
+                  </Button>
+                  <Link to="/create">
+                    <Button size="sm" variant="secondary">
+                      <Crown className="h-4 w-4 mr-2" />
+                      Create Your Story
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

@@ -24,6 +24,7 @@ import { getVoteCastEvents, resolveChapter } from "@/data/proposalData";
 import { formatAddress, getTimeAgo } from "@/lib/utils";
 import ProposalLoading from "@/components/ui/proposalLoading";
 import { StoryDataContext } from "@/contexts/storyDataContext";
+import { log } from "console";
 
 const StoryDetail = () => {
   const { id } = useParams();
@@ -84,16 +85,26 @@ const StoryDetail = () => {
 
   const handleVote = async (chapterId: number, choiceId: number) => {
     console.log("Voting for choice:", choiceId);
-    const transactionHash = await voteOnChapter(
-      story.storyId,
-      chapterId,
-      choiceId
-    );
-    console.log(`Vote cast successfully: ${transactionHash}`);
-    toast({
-      title: "Vote recorded!",
-      description: "Your choice will help shape the story's direction.",
-    });
+    try {
+      const transactionHash = await voteOnChapter(
+        story.storyId,
+        chapterId,
+        choiceId
+      );
+      console.log(`Vote cast successfully: ${transactionHash}`);
+      toast({
+        variant: "success",
+        title: "Vote recorded!",
+        description: "Your choice will help shape the story's direction.",
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        variant: "destructive",
+        title: "Vote failed",
+        description: `There was an error submitting your vote: ${error.message}`,
+      });
+    }
   };
 
   const handleShare = () => {
@@ -116,6 +127,7 @@ const StoryDetail = () => {
         currentChapter.chapterId
       );
       toast({
+        variant: "success",
         title: "Chapter Resolved!",
         description: "The chapter has been resolved successfully.",
       });
@@ -124,8 +136,9 @@ const StoryDetail = () => {
     } catch (error) {
       console.error("Error resolving chapter:", error);
       toast({
+        variant: "destructive",
         title: "Error Resolving Chapter",
-        description: "There was an error resolving the chapter.",
+        description: `There was an error resolving the chapter:${error.message}`,
       });
     }
   };

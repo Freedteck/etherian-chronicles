@@ -31,7 +31,6 @@ interface FormData {
   isLastChapter?: boolean;
 }
 
-
 interface FormErrors {
   title?: string;
   summary?: string;
@@ -196,20 +195,14 @@ const CreateStoryForm = () => {
           toastResult.dismiss();
         }
 
-        if (transactionHash) {
-          toast({
-            variant: "success",
-            title: "Story created successfully",
-            description: "Your story has been created.",
-          });
-          navigate("/stories");
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Transaction failed",
-            description: "Please try again later.",
-          });
-        }
+        console.log(transactionHash);
+
+        toast({
+          variant: "success",
+          title: "Story created successfully",
+          description: "Your story has been created.",
+        });
+        navigate("/stories");
       } catch (error) {
         if (loadingToastId) {
           toastResult.dismiss();
@@ -217,7 +210,7 @@ const CreateStoryForm = () => {
         toast({
           variant: "destructive",
           title: "Error creating story",
-          description: "Please try again later.",
+          description: error.message,
         });
       } finally {
         setIsSubmitting(false);

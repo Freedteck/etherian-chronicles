@@ -21,7 +21,6 @@ interface ChapterData {
   votingOptions: string[];
   isLastChapter?: boolean;
   votingQuestion?: string;
-  
 }
 
 interface ChapterErrors {
@@ -88,13 +87,38 @@ const AddChapterModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
+    if (!validateForm()) {
+      toast({
+        variant: "destructive",
+        title: "Form Validation failed",
+        description: "Fill out all required part of the form",
+      });
+      return;
+    }
+    const toastResult = toast({
+      title: "Adding Chapter",
+      description: "Chapter is being added. Please wait...",
+    });
+
+    try {
       await onChapterAdded(formData);
+      toast({
+        variant: "success",
+        title: "Chapter added successfully",
+        description: "New Chapter added successfully.",
+      });
 
       // Reset form
       setFormData({ title: "", content: "", votingOptions: [] });
       setNewOption("");
       onClose();
+    } catch (error) {
+      console.log(error);
+      toast({
+        variant: "destructive",
+        title: "Adding Chapter failed",
+        description: `Error adding chapter, please try again`,
+      });
     }
   };
 
@@ -190,95 +214,104 @@ const AddChapterModal = ({
           </div>
 
           <Card className="p-8">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
-                    <Vote className="h-5 w-5 text-secondary" />
-                    </div>
-                    <h2 className="text-xl font-display font-bold">Chapter Settings</h2>
-          
-                  </div>
-          
-                  <div className="space-y-6">
-                    <div className=" flex items-center space-x-3">
-                      <input type="checkbox" id="isLastChapter" checked={formData.isLastChapter || false} 
-                      onChange={(e)=> setFormData((prev) => ({ ...prev, isLastChapter: e.target.checked }))} />
-                       <Label htmlFor="isLastChapter">This is the last chapter</Label>
-          
-                    </div>
-          
-                  </div>
-                </Card>
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+                <Vote className="h-5 w-5 text-secondary" />
+              </div>
+              <h2 className="text-xl font-display font-bold">
+                Chapter Settings
+              </h2>
+            </div>
+
+            <div className="space-y-6">
+              <div className=" flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="isLastChapter"
+                  checked={formData.isLastChapter || false}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isLastChapter: e.target.checked,
+                    }))
+                  }
+                />
+                <Label htmlFor="isLastChapter">This is the last chapter</Label>
+              </div>
+            </div>
+          </Card>
 
           {/* Voting Options */}
           {!formData.isLastChapter && (
-            
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Vote className="h-4 w-4 text-accent" />
-              <Label>Voting Options (Optional)</Label>
-            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Vote className="h-4 w-4 text-accent" />
+                <Label>Voting Options (Optional)</Label>
+              </div>
 
-            <p className="text-sm text-muted-foreground">
-              Add options for readers to vote on what happens next. If you add
-              options, you need at least 2.
-            </p>
+              <p className="text-sm text-muted-foreground">
+                Add options for readers to vote on what happens next. If you add
+                options, you need at least 2.
+              </p>
 
-            {/* Current Options */}
-            {formData.votingOptions.length > 0 && (
-              <div className="space-y-3">
-                {formData.votingOptions.map((option, index) => (
-                  <div
-                    key={option}
-                    className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg"
-                  >
-                    <Badge variant="outline" className="text-xs">
-                      Option {String.fromCharCode(65 + index)}
-                    </Badge>
-                    <Input
-                      value={option}
-                      onChange={(e) => updateVotingOption(e.target.value)}
-                      placeholder="Enter voting option..."
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeVotingOption(option)}
+              {/* Current Options */}
+              {formData.votingOptions.length > 0 && (
+                <div className="space-y-3">
+                  {formData.votingOptions.map((option, index) => (
+                    <div
+                      key={option}
+                      className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+                      <Badge variant="outline" className="text-xs">
+                        Option {String.fromCharCode(65 + index)}
+                      </Badge>
+                      <Input
+                        value={option}
+                        onChange={(e) => updateVotingOption(e.target.value)}
+                        placeholder="Enter voting option..."
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeVotingOption(option)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-            {/* Add New Option */}
-            {formData.votingOptions.length < 6 && (
-              <div className="flex space-x-3">
-                <Input
-                  value={newOption}
-                  onChange={(e) => setNewOption(e.target.value)}
-                  placeholder="Enter a path readers can choose..."
-                  className="flex-1"
-                  onKeyPress={(e) => e.key === "Enter" && addVotingOption()}
-                />
-                <Button
-                  type="button"
-                  onClick={addVotingOption}
-                  disabled={!newOption.trim()}
-                  variant="outline"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Option
-                </Button>
-              </div>
-            )}
+              {/* Add New Option */}
+              {formData.votingOptions.length < 6 && (
+                <div className="flex space-x-3">
+                  <Input
+                    value={newOption}
+                    onChange={(e) => setNewOption(e.target.value)}
+                    placeholder="Enter a path readers can choose..."
+                    className="flex-1"
+                    onKeyPress={(e) => e.key === "Enter" && addVotingOption()}
+                  />
+                  <Button
+                    type="button"
+                    onClick={addVotingOption}
+                    disabled={!newOption.trim()}
+                    variant="outline"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Option
+                  </Button>
+                </div>
+              )}
 
-            {errors.votingOptions && (
-              <p className="text-sm text-destructive">{errors.votingOptions}</p>
-            )}
-          </div>
+              {errors.votingOptions && (
+                <p className="text-sm text-destructive">
+                  {errors.votingOptions}
+                </p>
+              )}
+            </div>
           )}
 
           {/* Action Buttons */}

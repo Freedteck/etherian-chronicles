@@ -81,8 +81,10 @@ const ProposalDetail = () => {
       title: "Submitting your vote...",
       description: "Please wait while we process your vote.",
     });
-    const transactionHash = await voteOnProposal(proposal?.storyId, voteType);
-    if (transactionHash) {
+
+    try {
+      const transactionHash = await voteOnProposal(proposal?.storyId, voteType);
+
       toast({
         variant: "success",
         title: "Vote submitted",
@@ -90,30 +92,38 @@ const ProposalDetail = () => {
           voteType === 1 ? "For" : "Against"
         } the proposal.`,
       });
+      console.log(transactionHash);
+
       setHasVoted(true);
       setUserVote(voteType);
-    } else {
+    } catch (error) {
+      console.log(error);
+
       toast({
         variant: "destructive",
         title: "Vote failed",
-        description: "There was an error submitting your vote.",
+        description: `There was an error submitting your vote: ${error.message}`,
       });
     }
   };
 
   const handleResolve = async () => {
-    const transactionHash = await resolveStoryProposal(proposal?.storyId);
-    if (transactionHash) {
+    try {
+      const transactionHash = await resolveStoryProposal(proposal?.storyId);
+
       toast({
         variant: "success",
         title: "Proposal resolved",
         description: "The proposal has been resolved successfully.",
       });
-    } else {
+
+      console.log(transactionHash);
+    } catch (error) {
+      console.log(error);
       toast({
         variant: "destructive",
         title: "Resolution failed",
-        description: "There was an error resolving the proposal.",
+        description: `There was an error resolving the proposal: ${error.message}`,
       });
     }
   };
@@ -125,6 +135,9 @@ const ProposalDetail = () => {
       description: "Share this proposal with others.",
     });
   };
+  const isAuthorOrCollaborator = proposal?.collaborators.includes(
+    account?.address
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -280,10 +293,14 @@ const ProposalDetail = () => {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
-                <Button variant="outline" onClick={handleResolve}>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Resolve
-                </Button>
+                {isAuthorOrCollaborator ? (
+                  <Button variant="outline" onClick={handleResolve}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Resolve
+                  </Button>
+                ) : (
+                  ""
+                )}
               </div>
             </div>
           </div>
