@@ -35,56 +35,157 @@ export declare namespace EtherianChronicle {
     voteCount: bigint,
     nextChapterIndex: bigint
   ] & { text: string; voteCount: bigint; nextChapterIndex: bigint };
+
+  export type LoreFragmentDataStruct = {
+    storyId: BigNumberish;
+    chapterId: BigNumberish;
+    choiceIndex: BigNumberish;
+    mintTimestamp: BigNumberish;
+    userPointsAtMint: BigNumberish;
+    rarity: BigNumberish;
+  };
+
+  export type LoreFragmentDataStructOutput = [
+    storyId: bigint,
+    chapterId: bigint,
+    choiceIndex: bigint,
+    mintTimestamp: bigint,
+    userPointsAtMint: bigint,
+    rarity: bigint
+  ] & {
+    storyId: bigint;
+    chapterId: bigint;
+    choiceIndex: bigint;
+    mintTimestamp: bigint;
+    userPointsAtMint: bigint;
+    rarity: bigint;
+  };
+
+  export type LeaderboardEntryStruct = {
+    user: AddressLike;
+    points: BigNumberish;
+    winningVotes: BigNumberish;
+    storiesParticipated: BigNumberish;
+    referralCount: BigNumberish;
+  };
+
+  export type LeaderboardEntryStructOutput = [
+    user: string,
+    points: bigint,
+    winningVotes: bigint,
+    storiesParticipated: bigint,
+    referralCount: bigint
+  ] & {
+    user: string;
+    points: bigint;
+    winningVotes: bigint;
+    storiesParticipated: bigint;
+    referralCount: bigint;
+  };
+
+  export type UserProfileStruct = {
+    totalPoints: BigNumberish;
+    storiesParticipated: BigNumberish;
+    winningVotes: BigNumberish;
+    referrer: AddressLike;
+    referralCount: BigNumberish;
+    isRegistered: boolean;
+    registeredAt: BigNumberish;
+  };
+
+  export type UserProfileStructOutput = [
+    totalPoints: bigint,
+    storiesParticipated: bigint,
+    winningVotes: bigint,
+    referrer: string,
+    referralCount: bigint,
+    isRegistered: boolean,
+    registeredAt: bigint
+  ] & {
+    totalPoints: bigint;
+    storiesParticipated: bigint;
+    winningVotes: bigint;
+    referrer: string;
+    referralCount: bigint;
+    isRegistered: boolean;
+    registeredAt: bigint;
+  };
 }
 
 export interface EtherianChronicleInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "CHAPTER_VOTING_PERIOD"
+      | "EARLY_VOTE_PERIOD"
+      | "POINTS_EARLY_VOTE"
+      | "POINTS_REFERRAL"
+      | "POINTS_STORY_COMPLETION"
+      | "POINTS_WINNING_VOTE"
       | "PROPOSAL_VOTING_PERIOD"
       | "addChapter"
       | "addCollaborator"
       | "approve"
       | "balanceOf"
+      | "canClaimCompletionBonus"
+      | "canClaimFragment"
       | "checkIsCollaborator"
+      | "claimStoryCompletionBonus"
+      | "claimWinnerFragment"
       | "createStoryProposal"
+      | "earlyVoters"
+      | "endStory"
+      | "generateTokenURI"
       | "getApproved"
       | "getChapter"
-      | "getChapterBasicInfo"
       | "getChapterChoices"
       | "getCurrentChapterIndex"
-      | "getMultipleStoriesBasicInfo"
+      | "getFragmentData"
+      | "getLeaderboard"
       | "getProposalInfo"
       | "getProposalVoteCounts"
-      | "getStoryBasicInfo"
       | "getStoryCollaborators"
       | "getStoryDetails"
       | "getStoryStatus"
       | "getTotalChapters"
       | "getTotalStories"
+      | "getUserFragments"
+      | "getUserProfile"
       | "getUserProposalVote"
+      | "getUserRarityTier"
       | "getVotingPeriods"
+      | "hasClaimedCompletionBonus"
+      | "hasClaimedFragment"
       | "hasVotedOnChapter"
       | "hasVotedOnProposal"
       | "isApprovedForAll"
       | "isChapterVotingActive"
+      | "leaderboard"
+      | "leaderboardCount"
+      | "loreFragmentData"
       | "mintLoreFragment"
       | "name"
       | "owner"
       | "ownerOf"
+      | "pauseStory"
+      | "registerUser"
       | "renounceOwnership"
       | "resolveChapter"
       | "resolveProposal"
+      | "resumeStory"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setApprovalForAll"
       | "stories"
+      | "storyCompletionBonusAvailable"
       | "storyIdToCurrentChapterIndex"
       | "supportsInterface"
       | "symbol"
       | "tokenURI"
       | "transferFrom"
       | "transferOwnership"
+      | "userOwnedFragments"
+      | "userProfiles"
+      | "userVoteChoices"
       | "voteOnChapter"
       | "voteOnProposal"
   ): FunctionFragment;
@@ -97,19 +198,44 @@ export interface EtherianChronicleInterface extends Interface {
       | "ChapterAdded"
       | "ChapterResolved"
       | "CollaboratorAdded"
+      | "LeaderboardUpdated"
       | "LoreFragmentMinted"
       | "MetadataUpdate"
       | "OwnershipTransferred"
+      | "PointsAwarded"
       | "ProposalVoteCast"
       | "StoryApproved"
+      | "StoryCompleted"
+      | "StoryCompletionBonusAwarded"
       | "StoryProposed"
       | "StoryRejected"
       | "Transfer"
+      | "UserRegistered"
       | "VoteCast"
   ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "CHAPTER_VOTING_PERIOD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "EARLY_VOTE_PERIOD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "POINTS_EARLY_VOTE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "POINTS_REFERRAL",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "POINTS_STORY_COMPLETION",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "POINTS_WINNING_VOTE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -133,12 +259,40 @@ export interface EtherianChronicleInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "canClaimCompletionBonus",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "canClaimFragment",
+    values: [BigNumberish, BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "checkIsCollaborator",
     values: [BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "claimStoryCompletionBonus",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "claimWinnerFragment",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "createStoryProposal",
     values: [string, string, string, string, string[], AddressLike[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "earlyVoters",
+    values: [BigNumberish, BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "endStory",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "generateTokenURI",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
@@ -146,10 +300,6 @@ export interface EtherianChronicleInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getChapter",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getChapterBasicInfo",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -161,7 +311,11 @@ export interface EtherianChronicleInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getMultipleStoriesBasicInfo",
+    functionFragment: "getFragmentData",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getLeaderboard",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -170,10 +324,6 @@ export interface EtherianChronicleInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getProposalVoteCounts",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getStoryBasicInfo",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -197,12 +347,32 @@ export interface EtherianChronicleInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getUserFragments",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getUserProfile",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getUserProposalVote",
     values: [BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "getUserRarityTier",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getVotingPeriods",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "hasClaimedCompletionBonus",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "hasClaimedFragment",
+    values: [BigNumberish, BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "hasVotedOnChapter",
@@ -221,6 +391,18 @@ export interface EtherianChronicleInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "leaderboard",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "leaderboardCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "loreFragmentData",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "mintLoreFragment",
     values: [AddressLike, BigNumberish, BigNumberish, string]
   ): string;
@@ -229,6 +411,14 @@ export interface EtherianChronicleInterface extends Interface {
   encodeFunctionData(
     functionFragment: "ownerOf",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "pauseStory",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "registerUser",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -240,6 +430,10 @@ export interface EtherianChronicleInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "resolveProposal",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "resumeStory",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -256,6 +450,10 @@ export interface EtherianChronicleInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "stories",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "storyCompletionBonusAvailable",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -280,6 +478,18 @@ export interface EtherianChronicleInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "userOwnedFragments",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "userProfiles",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "userVoteChoices",
+    values: [BigNumberish, BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "voteOnChapter",
     values: [BigNumberish, BigNumberish, BigNumberish]
   ): string;
@@ -290,6 +500,26 @@ export interface EtherianChronicleInterface extends Interface {
 
   decodeFunctionResult(
     functionFragment: "CHAPTER_VOTING_PERIOD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "EARLY_VOTE_PERIOD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "POINTS_EARLY_VOTE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "POINTS_REFERRAL",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "POINTS_STORY_COMPLETION",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "POINTS_WINNING_VOTE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -304,7 +534,23 @@ export interface EtherianChronicleInterface extends Interface {
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "canClaimCompletionBonus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "canClaimFragment",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "checkIsCollaborator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "claimStoryCompletionBonus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "claimWinnerFragment",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -312,14 +558,19 @@ export interface EtherianChronicleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "earlyVoters",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "endStory", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "generateTokenURI",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getApproved",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getChapter", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getChapterBasicInfo",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "getChapterChoices",
     data: BytesLike
@@ -329,7 +580,11 @@ export interface EtherianChronicleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getMultipleStoriesBasicInfo",
+    functionFragment: "getFragmentData",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getLeaderboard",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -338,10 +593,6 @@ export interface EtherianChronicleInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getProposalVoteCounts",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getStoryBasicInfo",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -365,11 +616,31 @@ export interface EtherianChronicleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getUserFragments",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getUserProfile",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getUserProposalVote",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getUserRarityTier",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getVotingPeriods",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "hasClaimedCompletionBonus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "hasClaimedFragment",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -389,12 +660,29 @@ export interface EtherianChronicleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "leaderboard",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "leaderboardCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "loreFragmentData",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "mintLoreFragment",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "pauseStory", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "registerUser",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -405,6 +693,10 @@ export interface EtherianChronicleInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "resolveProposal",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "resumeStory",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -421,6 +713,10 @@ export interface EtherianChronicleInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "stories", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "storyCompletionBonusAvailable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "storyIdToCurrentChapterIndex",
     data: BytesLike
   ): Result;
@@ -436,6 +732,18 @@ export interface EtherianChronicleInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "userOwnedFragments",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "userProfiles",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "userVoteChoices",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -567,6 +875,24 @@ export namespace CollaboratorAddedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace LeaderboardUpdatedEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    position: BigNumberish,
+    points: BigNumberish
+  ];
+  export type OutputTuple = [user: string, position: bigint, points: bigint];
+  export interface OutputObject {
+    user: string;
+    position: bigint;
+    points: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace LoreFragmentMintedEvent {
   export type InputTuple = [
     recipient: AddressLike,
@@ -617,6 +943,24 @@ export namespace OwnershipTransferredEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace PointsAwardedEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    points: BigNumberish,
+    reason: string
+  ];
+  export type OutputTuple = [user: string, points: bigint, reason: string];
+  export interface OutputObject {
+    user: string;
+    points: bigint;
+    reason: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace ProposalVoteCastEvent {
   export type InputTuple = [
     storyId: BigNumberish,
@@ -640,6 +984,50 @@ export namespace StoryApprovedEvent {
   export type OutputTuple = [storyId: bigint];
   export interface OutputObject {
     storyId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace StoryCompletedEvent {
+  export type InputTuple = [
+    storyId: BigNumberish,
+    totalChapters: BigNumberish,
+    totalParticipants: BigNumberish
+  ];
+  export type OutputTuple = [
+    storyId: bigint,
+    totalChapters: bigint,
+    totalParticipants: bigint
+  ];
+  export interface OutputObject {
+    storyId: bigint;
+    totalChapters: bigint;
+    totalParticipants: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace StoryCompletionBonusAwardedEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    storyId: BigNumberish,
+    bonusPoints: BigNumberish
+  ];
+  export type OutputTuple = [
+    user: string,
+    storyId: bigint,
+    bonusPoints: bigint
+  ];
+  export interface OutputObject {
+    user: string;
+    storyId: bigint;
+    bonusPoints: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -698,6 +1086,19 @@ export namespace TransferEvent {
     from: string;
     to: string;
     tokenId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UserRegisteredEvent {
+  export type InputTuple = [user: AddressLike, referrer: AddressLike];
+  export type OutputTuple = [user: string, referrer: string];
+  export interface OutputObject {
+    user: string;
+    referrer: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -775,6 +1176,16 @@ export interface EtherianChronicle extends BaseContract {
 
   CHAPTER_VOTING_PERIOD: TypedContractMethod<[], [bigint], "view">;
 
+  EARLY_VOTE_PERIOD: TypedContractMethod<[], [bigint], "view">;
+
+  POINTS_EARLY_VOTE: TypedContractMethod<[], [bigint], "view">;
+
+  POINTS_REFERRAL: TypedContractMethod<[], [bigint], "view">;
+
+  POINTS_STORY_COMPLETION: TypedContractMethod<[], [bigint], "view">;
+
+  POINTS_WINNING_VOTE: TypedContractMethod<[], [bigint], "view">;
+
   PROPOSAL_VOTING_PERIOD: TypedContractMethod<[], [bigint], "view">;
 
   addChapter: TypedContractMethod<
@@ -803,10 +1214,34 @@ export interface EtherianChronicle extends BaseContract {
 
   balanceOf: TypedContractMethod<[owner: AddressLike], [bigint], "view">;
 
+  canClaimCompletionBonus: TypedContractMethod<
+    [_storyId: BigNumberish, _user: AddressLike],
+    [boolean],
+    "view"
+  >;
+
+  canClaimFragment: TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish, _user: AddressLike],
+    [boolean],
+    "view"
+  >;
+
   checkIsCollaborator: TypedContractMethod<
     [_storyId: BigNumberish, _addr: AddressLike],
     [boolean],
     "view"
+  >;
+
+  claimStoryCompletionBonus: TypedContractMethod<
+    [_storyId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  claimWinnerFragment: TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
+    [void],
+    "nonpayable"
   >;
 
   createStoryProposal: TypedContractMethod<
@@ -820,6 +1255,20 @@ export interface EtherianChronicle extends BaseContract {
     ],
     [void],
     "nonpayable"
+  >;
+
+  earlyVoters: TypedContractMethod<
+    [arg0: BigNumberish, arg1: BigNumberish, arg2: AddressLike],
+    [boolean],
+    "view"
+  >;
+
+  endStory: TypedContractMethod<[_storyId: BigNumberish], [void], "nonpayable">;
+
+  generateTokenURI: TypedContractMethod<
+    [_tokenId: BigNumberish],
+    [string],
+    "view"
   >;
 
   getApproved: TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
@@ -850,23 +1299,6 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
 
-  getChapterBasicInfo: TypedContractMethod<
-    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
-    [
-      [bigint, string, bigint, bigint, bigint, boolean, bigint, bigint] & {
-        chapterId: bigint;
-        ipfsHash: string;
-        createdAt: bigint;
-        voteEndTime: bigint;
-        winningChoiceIndex: bigint;
-        isResolved: boolean;
-        voteCountSum: bigint;
-        totalChoices: bigint;
-      }
-    ],
-    "view"
-  >;
-
   getChapterChoices: TypedContractMethod<
     [_storyId: BigNumberish, _chapterIndex: BigNumberish],
     [EtherianChronicle.ChoiceStructOutput[]],
@@ -879,16 +1311,15 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
 
-  getMultipleStoriesBasicInfo: TypedContractMethod<
-    [_startIndex: BigNumberish, _count: BigNumberish],
-    [
-      [bigint[], string[], string[], bigint[]] & {
-        storyIds: bigint[];
-        titles: string[];
-        writers: string[];
-        statuses: bigint[];
-      }
-    ],
+  getFragmentData: TypedContractMethod<
+    [_tokenId: BigNumberish],
+    [EtherianChronicle.LoreFragmentDataStructOutput],
+    "view"
+  >;
+
+  getLeaderboard: TypedContractMethod<
+    [_start: BigNumberish, _count: BigNumberish],
+    [EtherianChronicle.LeaderboardEntryStructOutput[]],
     "view"
   >;
 
@@ -908,20 +1339,6 @@ export interface EtherianChronicle extends BaseContract {
   getProposalVoteCounts: TypedContractMethod<
     [_storyId: BigNumberish],
     [[bigint, bigint] & { yesVotes: bigint; noVotes: bigint }],
-    "view"
-  >;
-
-  getStoryBasicInfo: TypedContractMethod<
-    [_storyId: BigNumberish],
-    [
-      [string, string, string, bigint, bigint] & {
-        title: string;
-        summary: string;
-        writer: string;
-        status: bigint;
-        totalChapters: bigint;
-      }
-    ],
     "view"
   >;
 
@@ -981,8 +1398,26 @@ export interface EtherianChronicle extends BaseContract {
 
   getTotalStories: TypedContractMethod<[], [bigint], "view">;
 
+  getUserFragments: TypedContractMethod<
+    [_user: AddressLike],
+    [bigint[]],
+    "view"
+  >;
+
+  getUserProfile: TypedContractMethod<
+    [_user: AddressLike],
+    [EtherianChronicle.UserProfileStructOutput],
+    "view"
+  >;
+
   getUserProposalVote: TypedContractMethod<
     [_storyId: BigNumberish, _voter: AddressLike],
+    [bigint],
+    "view"
+  >;
+
+  getUserRarityTier: TypedContractMethod<
+    [_user: AddressLike],
     [bigint],
     "view"
   >;
@@ -990,6 +1425,18 @@ export interface EtherianChronicle extends BaseContract {
   getVotingPeriods: TypedContractMethod<
     [],
     [[bigint, bigint] & { proposalPeriod: bigint; chapterPeriod: bigint }],
+    "view"
+  >;
+
+  hasClaimedCompletionBonus: TypedContractMethod<
+    [arg0: BigNumberish, arg1: AddressLike],
+    [boolean],
+    "view"
+  >;
+
+  hasClaimedFragment: TypedContractMethod<
+    [arg0: BigNumberish, arg1: BigNumberish, arg2: AddressLike],
+    [boolean],
     "view"
   >;
 
@@ -1017,6 +1464,37 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
 
+  leaderboard: TypedContractMethod<
+    [arg0: BigNumberish],
+    [
+      [string, bigint, bigint, bigint, bigint] & {
+        user: string;
+        points: bigint;
+        winningVotes: bigint;
+        storiesParticipated: bigint;
+        referralCount: bigint;
+      }
+    ],
+    "view"
+  >;
+
+  leaderboardCount: TypedContractMethod<[], [bigint], "view">;
+
+  loreFragmentData: TypedContractMethod<
+    [arg0: BigNumberish],
+    [
+      [bigint, bigint, bigint, bigint, bigint, bigint] & {
+        storyId: bigint;
+        chapterId: bigint;
+        choiceIndex: bigint;
+        mintTimestamp: bigint;
+        userPointsAtMint: bigint;
+        rarity: bigint;
+      }
+    ],
+    "view"
+  >;
+
   mintLoreFragment: TypedContractMethod<
     [
       _recipient: AddressLike,
@@ -1034,6 +1512,18 @@ export interface EtherianChronicle extends BaseContract {
 
   ownerOf: TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
 
+  pauseStory: TypedContractMethod<
+    [_storyId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  registerUser: TypedContractMethod<
+    [_referrer: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   resolveChapter: TypedContractMethod<
@@ -1043,6 +1533,12 @@ export interface EtherianChronicle extends BaseContract {
   >;
 
   resolveProposal: TypedContractMethod<
+    [_storyId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  resumeStory: TypedContractMethod<
     [_storyId: BigNumberish],
     [void],
     "nonpayable"
@@ -1103,6 +1599,12 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
 
+  storyCompletionBonusAvailable: TypedContractMethod<
+    [arg0: BigNumberish],
+    [boolean],
+    "view"
+  >;
+
   storyIdToCurrentChapterIndex: TypedContractMethod<
     [arg0: BigNumberish],
     [bigint],
@@ -1131,6 +1633,34 @@ export interface EtherianChronicle extends BaseContract {
     "nonpayable"
   >;
 
+  userOwnedFragments: TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
+    [bigint],
+    "view"
+  >;
+
+  userProfiles: TypedContractMethod<
+    [arg0: AddressLike],
+    [
+      [bigint, bigint, bigint, string, bigint, boolean, bigint] & {
+        totalPoints: bigint;
+        storiesParticipated: bigint;
+        winningVotes: bigint;
+        referrer: string;
+        referralCount: bigint;
+        isRegistered: boolean;
+        registeredAt: bigint;
+      }
+    ],
+    "view"
+  >;
+
+  userVoteChoices: TypedContractMethod<
+    [arg0: BigNumberish, arg1: BigNumberish, arg2: AddressLike],
+    [bigint],
+    "view"
+  >;
+
   voteOnChapter: TypedContractMethod<
     [
       _storyId: BigNumberish,
@@ -1153,6 +1683,21 @@ export interface EtherianChronicle extends BaseContract {
 
   getFunction(
     nameOrSignature: "CHAPTER_VOTING_PERIOD"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "EARLY_VOTE_PERIOD"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "POINTS_EARLY_VOTE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "POINTS_REFERRAL"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "POINTS_STORY_COMPLETION"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "POINTS_WINNING_VOTE"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "PROPOSAL_VOTING_PERIOD"
@@ -1188,11 +1733,35 @@ export interface EtherianChronicle extends BaseContract {
     nameOrSignature: "balanceOf"
   ): TypedContractMethod<[owner: AddressLike], [bigint], "view">;
   getFunction(
+    nameOrSignature: "canClaimCompletionBonus"
+  ): TypedContractMethod<
+    [_storyId: BigNumberish, _user: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "canClaimFragment"
+  ): TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish, _user: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "checkIsCollaborator"
   ): TypedContractMethod<
     [_storyId: BigNumberish, _addr: AddressLike],
     [boolean],
     "view"
+  >;
+  getFunction(
+    nameOrSignature: "claimStoryCompletionBonus"
+  ): TypedContractMethod<[_storyId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "claimWinnerFragment"
+  ): TypedContractMethod<
+    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
+    [void],
+    "nonpayable"
   >;
   getFunction(
     nameOrSignature: "createStoryProposal"
@@ -1208,6 +1777,19 @@ export interface EtherianChronicle extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "earlyVoters"
+  ): TypedContractMethod<
+    [arg0: BigNumberish, arg1: BigNumberish, arg2: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "endStory"
+  ): TypedContractMethod<[_storyId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "generateTokenURI"
+  ): TypedContractMethod<[_tokenId: BigNumberish], [string], "view">;
   getFunction(
     nameOrSignature: "getApproved"
   ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
@@ -1239,24 +1821,6 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "getChapterBasicInfo"
-  ): TypedContractMethod<
-    [_storyId: BigNumberish, _chapterIndex: BigNumberish],
-    [
-      [bigint, string, bigint, bigint, bigint, boolean, bigint, bigint] & {
-        chapterId: bigint;
-        ipfsHash: string;
-        createdAt: bigint;
-        voteEndTime: bigint;
-        winningChoiceIndex: bigint;
-        isResolved: boolean;
-        voteCountSum: bigint;
-        totalChoices: bigint;
-      }
-    ],
-    "view"
-  >;
-  getFunction(
     nameOrSignature: "getChapterChoices"
   ): TypedContractMethod<
     [_storyId: BigNumberish, _chapterIndex: BigNumberish],
@@ -1267,17 +1831,17 @@ export interface EtherianChronicle extends BaseContract {
     nameOrSignature: "getCurrentChapterIndex"
   ): TypedContractMethod<[_storyId: BigNumberish], [bigint], "view">;
   getFunction(
-    nameOrSignature: "getMultipleStoriesBasicInfo"
+    nameOrSignature: "getFragmentData"
   ): TypedContractMethod<
-    [_startIndex: BigNumberish, _count: BigNumberish],
-    [
-      [bigint[], string[], string[], bigint[]] & {
-        storyIds: bigint[];
-        titles: string[];
-        writers: string[];
-        statuses: bigint[];
-      }
-    ],
+    [_tokenId: BigNumberish],
+    [EtherianChronicle.LoreFragmentDataStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getLeaderboard"
+  ): TypedContractMethod<
+    [_start: BigNumberish, _count: BigNumberish],
+    [EtherianChronicle.LeaderboardEntryStructOutput[]],
     "view"
   >;
   getFunction(
@@ -1299,21 +1863,6 @@ export interface EtherianChronicle extends BaseContract {
   ): TypedContractMethod<
     [_storyId: BigNumberish],
     [[bigint, bigint] & { yesVotes: bigint; noVotes: bigint }],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getStoryBasicInfo"
-  ): TypedContractMethod<
-    [_storyId: BigNumberish],
-    [
-      [string, string, string, bigint, bigint] & {
-        title: string;
-        summary: string;
-        writer: string;
-        status: bigint;
-        totalChapters: bigint;
-      }
-    ],
     "view"
   >;
   getFunction(
@@ -1366,6 +1915,16 @@ export interface EtherianChronicle extends BaseContract {
     nameOrSignature: "getTotalStories"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "getUserFragments"
+  ): TypedContractMethod<[_user: AddressLike], [bigint[]], "view">;
+  getFunction(
+    nameOrSignature: "getUserProfile"
+  ): TypedContractMethod<
+    [_user: AddressLike],
+    [EtherianChronicle.UserProfileStructOutput],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getUserProposalVote"
   ): TypedContractMethod<
     [_storyId: BigNumberish, _voter: AddressLike],
@@ -1373,10 +1932,27 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "getUserRarityTier"
+  ): TypedContractMethod<[_user: AddressLike], [bigint], "view">;
+  getFunction(
     nameOrSignature: "getVotingPeriods"
   ): TypedContractMethod<
     [],
     [[bigint, bigint] & { proposalPeriod: bigint; chapterPeriod: bigint }],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "hasClaimedCompletionBonus"
+  ): TypedContractMethod<
+    [arg0: BigNumberish, arg1: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "hasClaimedFragment"
+  ): TypedContractMethod<
+    [arg0: BigNumberish, arg1: BigNumberish, arg2: AddressLike],
+    [boolean],
     "view"
   >;
   getFunction(
@@ -1408,6 +1984,40 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "leaderboard"
+  ): TypedContractMethod<
+    [arg0: BigNumberish],
+    [
+      [string, bigint, bigint, bigint, bigint] & {
+        user: string;
+        points: bigint;
+        winningVotes: bigint;
+        storiesParticipated: bigint;
+        referralCount: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "leaderboardCount"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "loreFragmentData"
+  ): TypedContractMethod<
+    [arg0: BigNumberish],
+    [
+      [bigint, bigint, bigint, bigint, bigint, bigint] & {
+        storyId: bigint;
+        chapterId: bigint;
+        choiceIndex: bigint;
+        mintTimestamp: bigint;
+        userPointsAtMint: bigint;
+        rarity: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "mintLoreFragment"
   ): TypedContractMethod<
     [
@@ -1429,6 +2039,12 @@ export interface EtherianChronicle extends BaseContract {
     nameOrSignature: "ownerOf"
   ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
   getFunction(
+    nameOrSignature: "pauseStory"
+  ): TypedContractMethod<[_storyId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "registerUser"
+  ): TypedContractMethod<[_referrer: AddressLike], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
@@ -1440,6 +2056,9 @@ export interface EtherianChronicle extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "resolveProposal"
+  ): TypedContractMethod<[_storyId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "resumeStory"
   ): TypedContractMethod<[_storyId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "safeTransferFrom(address,address,uint256)"
@@ -1501,6 +2120,9 @@ export interface EtherianChronicle extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "storyCompletionBonusAvailable"
+  ): TypedContractMethod<[arg0: BigNumberish], [boolean], "view">;
+  getFunction(
     nameOrSignature: "storyIdToCurrentChapterIndex"
   ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
   getFunction(
@@ -1522,6 +2144,37 @@ export interface EtherianChronicle extends BaseContract {
   getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "userOwnedFragments"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "userProfiles"
+  ): TypedContractMethod<
+    [arg0: AddressLike],
+    [
+      [bigint, bigint, bigint, string, bigint, boolean, bigint] & {
+        totalPoints: bigint;
+        storiesParticipated: bigint;
+        winningVotes: bigint;
+        referrer: string;
+        referralCount: bigint;
+        isRegistered: boolean;
+        registeredAt: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "userVoteChoices"
+  ): TypedContractMethod<
+    [arg0: BigNumberish, arg1: BigNumberish, arg2: AddressLike],
+    [bigint],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "voteOnChapter"
   ): TypedContractMethod<
@@ -1584,6 +2237,13 @@ export interface EtherianChronicle extends BaseContract {
     CollaboratorAddedEvent.OutputObject
   >;
   getEvent(
+    key: "LeaderboardUpdated"
+  ): TypedContractEvent<
+    LeaderboardUpdatedEvent.InputTuple,
+    LeaderboardUpdatedEvent.OutputTuple,
+    LeaderboardUpdatedEvent.OutputObject
+  >;
+  getEvent(
     key: "LoreFragmentMinted"
   ): TypedContractEvent<
     LoreFragmentMintedEvent.InputTuple,
@@ -1605,6 +2265,13 @@ export interface EtherianChronicle extends BaseContract {
     OwnershipTransferredEvent.OutputObject
   >;
   getEvent(
+    key: "PointsAwarded"
+  ): TypedContractEvent<
+    PointsAwardedEvent.InputTuple,
+    PointsAwardedEvent.OutputTuple,
+    PointsAwardedEvent.OutputObject
+  >;
+  getEvent(
     key: "ProposalVoteCast"
   ): TypedContractEvent<
     ProposalVoteCastEvent.InputTuple,
@@ -1617,6 +2284,20 @@ export interface EtherianChronicle extends BaseContract {
     StoryApprovedEvent.InputTuple,
     StoryApprovedEvent.OutputTuple,
     StoryApprovedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StoryCompleted"
+  ): TypedContractEvent<
+    StoryCompletedEvent.InputTuple,
+    StoryCompletedEvent.OutputTuple,
+    StoryCompletedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StoryCompletionBonusAwarded"
+  ): TypedContractEvent<
+    StoryCompletionBonusAwardedEvent.InputTuple,
+    StoryCompletionBonusAwardedEvent.OutputTuple,
+    StoryCompletionBonusAwardedEvent.OutputObject
   >;
   getEvent(
     key: "StoryProposed"
@@ -1638,6 +2319,13 @@ export interface EtherianChronicle extends BaseContract {
     TransferEvent.InputTuple,
     TransferEvent.OutputTuple,
     TransferEvent.OutputObject
+  >;
+  getEvent(
+    key: "UserRegistered"
+  ): TypedContractEvent<
+    UserRegisteredEvent.InputTuple,
+    UserRegisteredEvent.OutputTuple,
+    UserRegisteredEvent.OutputObject
   >;
   getEvent(
     key: "VoteCast"
@@ -1714,6 +2402,17 @@ export interface EtherianChronicle extends BaseContract {
       CollaboratorAddedEvent.OutputObject
     >;
 
+    "LeaderboardUpdated(address,uint256,uint256)": TypedContractEvent<
+      LeaderboardUpdatedEvent.InputTuple,
+      LeaderboardUpdatedEvent.OutputTuple,
+      LeaderboardUpdatedEvent.OutputObject
+    >;
+    LeaderboardUpdated: TypedContractEvent<
+      LeaderboardUpdatedEvent.InputTuple,
+      LeaderboardUpdatedEvent.OutputTuple,
+      LeaderboardUpdatedEvent.OutputObject
+    >;
+
     "LoreFragmentMinted(address,uint256,uint256,uint256)": TypedContractEvent<
       LoreFragmentMintedEvent.InputTuple,
       LoreFragmentMintedEvent.OutputTuple,
@@ -1747,6 +2446,17 @@ export interface EtherianChronicle extends BaseContract {
       OwnershipTransferredEvent.OutputObject
     >;
 
+    "PointsAwarded(address,uint256,string)": TypedContractEvent<
+      PointsAwardedEvent.InputTuple,
+      PointsAwardedEvent.OutputTuple,
+      PointsAwardedEvent.OutputObject
+    >;
+    PointsAwarded: TypedContractEvent<
+      PointsAwardedEvent.InputTuple,
+      PointsAwardedEvent.OutputTuple,
+      PointsAwardedEvent.OutputObject
+    >;
+
     "ProposalVoteCast(uint256,address,uint8)": TypedContractEvent<
       ProposalVoteCastEvent.InputTuple,
       ProposalVoteCastEvent.OutputTuple,
@@ -1767,6 +2477,28 @@ export interface EtherianChronicle extends BaseContract {
       StoryApprovedEvent.InputTuple,
       StoryApprovedEvent.OutputTuple,
       StoryApprovedEvent.OutputObject
+    >;
+
+    "StoryCompleted(uint256,uint256,uint256)": TypedContractEvent<
+      StoryCompletedEvent.InputTuple,
+      StoryCompletedEvent.OutputTuple,
+      StoryCompletedEvent.OutputObject
+    >;
+    StoryCompleted: TypedContractEvent<
+      StoryCompletedEvent.InputTuple,
+      StoryCompletedEvent.OutputTuple,
+      StoryCompletedEvent.OutputObject
+    >;
+
+    "StoryCompletionBonusAwarded(address,uint256,uint256)": TypedContractEvent<
+      StoryCompletionBonusAwardedEvent.InputTuple,
+      StoryCompletionBonusAwardedEvent.OutputTuple,
+      StoryCompletionBonusAwardedEvent.OutputObject
+    >;
+    StoryCompletionBonusAwarded: TypedContractEvent<
+      StoryCompletionBonusAwardedEvent.InputTuple,
+      StoryCompletionBonusAwardedEvent.OutputTuple,
+      StoryCompletionBonusAwardedEvent.OutputObject
     >;
 
     "StoryProposed(uint256,address,string,string,string)": TypedContractEvent<
@@ -1800,6 +2532,17 @@ export interface EtherianChronicle extends BaseContract {
       TransferEvent.InputTuple,
       TransferEvent.OutputTuple,
       TransferEvent.OutputObject
+    >;
+
+    "UserRegistered(address,address)": TypedContractEvent<
+      UserRegisteredEvent.InputTuple,
+      UserRegisteredEvent.OutputTuple,
+      UserRegisteredEvent.OutputObject
+    >;
+    UserRegistered: TypedContractEvent<
+      UserRegisteredEvent.InputTuple,
+      UserRegisteredEvent.OutputTuple,
+      UserRegisteredEvent.OutputObject
     >;
 
     "VoteCast(uint256,uint256,address,uint256)": TypedContractEvent<
