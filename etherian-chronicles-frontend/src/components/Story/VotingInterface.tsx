@@ -61,7 +61,7 @@ const VotingInterface = ({ chapter, onVote, userVote = null }) => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-xl font-display font-semibold text-foreground mb-1">
-            Choose the Next Path
+            {chapter.votingQuestion}
           </h3>
           <p className="text-sm text-muted-foreground">
             Your vote shapes the story's direction

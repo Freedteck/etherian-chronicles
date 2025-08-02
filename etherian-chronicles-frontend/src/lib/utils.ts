@@ -110,3 +110,33 @@ export const formatForList = (timestamp) => {
 export const formatForDetails = (timestamp) => {
   return format(fromUnixTime(timestamp), "PPPP");
 };
+
+export const getRarityConfig = (rarity) => {
+  const rarityConfigs = {
+    0: {
+      name: "Common",
+      color: "bg-gray-500",
+      border: "border-gray-500",
+      gradient: "from-gray-400 to-gray-600",
+    },
+    1: {
+      name: "Rare",
+      color: "bg-blue-500",
+      border: "border-blue-500",
+      gradient: "from-blue-400 to-blue-600",
+    },
+    2: {
+      name: "Epic",
+      color: "bg-purple-500",
+      border: "border-purple-500",
+      gradient: "from-purple-400 to-purple-600",
+    },
+    3: {
+      name: "Legendary",
+      color: "bg-yellow-500",
+      border: "border-yellow-500",
+      gradient: "from-yellow-400 to-yellow-600",
+    },
+  };
+  return rarityConfigs[rarity] || rarityConfigs[0];
+};

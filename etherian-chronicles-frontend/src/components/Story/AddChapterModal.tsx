@@ -150,6 +150,13 @@ const AddChapterModal = ({
     }));
   };
 
+  const addVotingQuestion = (question: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      votingQuestion: question,
+    }));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -253,6 +260,21 @@ const AddChapterModal = ({
                 Add options for readers to vote on what happens next. If you add
                 options, you need at least 2.
               </p>
+
+              <div className="space-y-2">
+                <label htmlFor="VotingQuestion">
+                  Ask your readers a question
+                </label>
+                <Input
+                  type="text"
+                  id="VotingQuestion"
+                  placeholder="What should happen next?"
+                  value={formData.votingQuestion || ""}
+                  onChange={(e) => addVotingQuestion(e.target.value)}
+                  className="w-full"
+                  required
+                />
+              </div>
 
               {/* Current Options */}
               {formData.votingOptions.length > 0 && (

@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "./Utils.sol";
 
 // Custom errors for clarity and gas efficiency
 error StoryNotFound();
@@ -29,6 +30,9 @@ error PreviousChapterNotResolved();
 error InvalidPreviousChapterIndex();
 error StoryNotYetCreated();
 error ChapterCannotBeAddedToLiveVote();
+error UserAlreadyRegistered();
+error CannotReferSelf();
+error InvalidInput();
 
 contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard {
     // --- State Variables ---
@@ -38,6 +42,16 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
 
     uint256 public constant PROPOSAL_VOTING_PERIOD = 5 minutes;
     uint256 public constant CHAPTER_VOTING_PERIOD = 5 minutes;
+    uint256 public constant POINTS_WINNING_VOTE = 50;
+    uint256 public constant POINTS_EARLY_VOTE = 25;
+    uint256 public constant POINTS_REFERRAL = 20;
+    uint256 public constant POINTS_STORY_COMPLETION = 100;
+    uint256 public constant EARLY_VOTE_PERIOD = 6 hours;
+
+    // Leaderboard
+    LeaderboardEntry[50] public leaderboard; // Top 50 users
+    uint256 public leaderboardCount;
+
 
     // Enum for story status
     enum StoryStatus {
@@ -53,6 +67,13 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         NO_VOTE, // Default, unvoted
         YES_TO_WRITE,
         NO_TO_WRITE
+    }
+
+    enum RarityTier {
+        COMMON,    // 0-99 points
+        RARE,      // 100-499 points  
+        EPIC,      // 500-999 points
+        LEGENDARY  // 1000+ points
     }
 
     // Structs
@@ -93,9 +114,46 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         mapping(address => bool) isCollaborator; // Quick lookup for collaborators
     }
 
+    struct UserProfile {
+        uint256 totalPoints;
+        uint256 storiesParticipated;
+        uint256 winningVotes;
+        address referrer;
+        uint256 referralCount;
+        bool isRegistered;
+        uint256 registeredAt;
+    }
+
+    struct LoreFragmentData {
+        uint256 storyId;
+        uint256 chapterId;
+        uint256 choiceIndex;
+        uint256 mintTimestamp;
+        uint256 userPointsAtMint;
+        RarityTier rarity;
+    }
+
+    struct LeaderboardEntry {
+        address user;
+        uint256 points;
+        uint256 winningVotes;
+        uint256 storiesParticipated;
+        uint256 referralCount;
+    }
+
     // Mappings
     mapping(uint256 => Story) public stories; // storyId => Story struct
     mapping(uint256 => uint256) public storyIdToCurrentChapterIndex; // Convenience mapping
+    mapping(address => UserProfile) public userProfiles;
+    mapping(uint256 => LoreFragmentData) public loreFragmentData;
+    mapping(address => uint256[]) public userOwnedFragments;
+    mapping(uint256 => mapping(uint256 => mapping(address => bool))) public earlyVoters; // storyId => chapterId => voter => isEarlyVoter
+    mapping(uint256 => mapping(uint256 => mapping(address => bool))) public hasClaimedFragment; // storyId => chapterId => user => claimed
+    mapping(uint256 => mapping(uint256 => mapping(address => uint256))) public userVoteChoices;
+    mapping(uint256 => bool) public storyCompletionBonusAvailable;
+    mapping(uint256 => mapping(address => bool)) public hasClaimedCompletionBonus; // storyId => user => claimed
+
+
 
     // --- Events ---
     event StoryProposed(
@@ -137,6 +195,11 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         address indexed voter,
         ProposalVoteType voteType
     );
+    event UserRegistered(address indexed user, address indexed referrer);
+    event PointsAwarded(address indexed user, uint256 points, string reason);
+    event LeaderboardUpdated(address indexed user, uint256 position, uint256 points);
+    event StoryCompleted(uint256 indexed storyId, uint256 totalChapters, uint256 totalParticipants);
+    event StoryCompletionBonusAwarded(address indexed user, uint256 indexed storyId, uint256 bonusPoints);
 
     // --- Constructor ---
     constructor() ERC721("EtherianLoreFragment", "ELF") Ownable(msg.sender) {
@@ -167,6 +230,125 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
     }
 
     // --- Core Functions ---
+
+    /**
+     * @dev Register user with optional referrer
+     */
+    function registerUser(address _referrer) external {
+        if (userProfiles[msg.sender].isRegistered) revert UserAlreadyRegistered();
+        if (_referrer == msg.sender) revert CannotReferSelf();
+        
+        UserProfile storage profile = userProfiles[msg.sender];
+        profile.isRegistered = true;
+        profile.registeredAt = block.timestamp;
+        
+        if (_referrer != address(0) && userProfiles[_referrer].isRegistered) {
+            profile.referrer = _referrer;
+            userProfiles[_referrer].referralCount++;
+        }
+        
+        emit UserRegistered(msg.sender, _referrer);
+    }
+
+    /**
+     * @dev Award points to user and update leaderboard
+     */
+    function _awardPoints(address _user, uint256 _points, string memory _reason) internal {
+        if (!userProfiles[_user].isRegistered) {
+            // Auto-register user if not registered
+            userProfiles[_user].isRegistered = true;
+            userProfiles[_user].registeredAt = block.timestamp;
+        }
+        
+        userProfiles[_user].totalPoints += _points;
+        emit PointsAwarded(_user, _points, _reason);
+        
+        _updateLeaderboard(_user);
+    }
+
+    /**
+     * @dev Update leaderboard with user's new points
+     */
+    function _updateLeaderboard(address _user) internal {
+        uint256 userPoints = userProfiles[_user].totalPoints;
+        UserProfile storage profile = userProfiles[_user];
+        
+        // Find if user is already in leaderboard
+        uint256 existingIndex = type(uint256).max;
+        for (uint256 i = 0; i < leaderboardCount; i++) {
+            if (leaderboard[i].user == _user) {
+                existingIndex = i;
+                break;
+            }
+        }
+        
+        // Create new entry
+        LeaderboardEntry memory newEntry = LeaderboardEntry({
+            user: _user,
+            points: userPoints,
+            winningVotes: profile.winningVotes,
+            storiesParticipated: profile.storiesParticipated,
+            referralCount: profile.referralCount
+        });
+        
+        if (existingIndex != type(uint256).max) {
+            // Update existing entry
+            leaderboard[existingIndex] = newEntry;
+            
+            // Bubble sort to maintain order (simple for hackathon)
+            for (uint256 i = existingIndex; i > 0 && leaderboard[i].points > leaderboard[i-1].points; i--) {
+                LeaderboardEntry memory temp = leaderboard[i];
+                leaderboard[i] = leaderboard[i-1];
+                leaderboard[i-1] = temp;
+            }
+        } else if (leaderboardCount < 50) {
+            // Add new entry
+            leaderboard[leaderboardCount] = newEntry;
+            leaderboardCount++;
+            
+            // Bubble sort to maintain order
+            for (uint256 i = leaderboardCount - 1; i > 0 && leaderboard[i].points > leaderboard[i-1].points; i--) {
+                LeaderboardEntry memory temp = leaderboard[i];
+                leaderboard[i] = leaderboard[i-1];
+                leaderboard[i-1] = temp;
+            }
+        } else if (userPoints > leaderboard[49].points) {
+            // Replace last entry
+            leaderboard[49] = newEntry;
+            
+            // Bubble sort to maintain order
+            for (uint256 i = 49; i > 0 && leaderboard[i].points > leaderboard[i-1].points; i--) {
+                LeaderboardEntry memory temp = leaderboard[i];
+                leaderboard[i] = leaderboard[i-1];
+                leaderboard[i-1] = temp;
+            }
+        }
+    }
+
+    /**
+     * @dev Generate token URI from story data and user info
+     */
+    function generateTokenURI(uint256 _tokenId) public view returns (string memory) {
+        LoreFragmentData memory fragment = loreFragmentData[_tokenId];
+        Story storage story = stories[fragment.storyId];
+        
+        string memory rarityName = Utils.getRarityName(uint8(fragment.rarity));
+        
+        return string(abi.encodePacked(
+            'data:application/json;base64,',
+            Utils.base64Encode(bytes(abi.encodePacked(
+                '{"name":"', story.title, ' - Chapter ', Utils.toString(fragment.chapterId),
+                '","description":"Lore Fragment from collaborative story - ', rarityName, ' rarity",',
+                '"attributes":[',
+                    '{"trait_type":"Story","value":"', story.title, '"},',
+                    '{"trait_type":"Chapter","value":"', Utils.toString(fragment.chapterId), '"},',
+                    '{"trait_type":"Rarity","value":"', rarityName, '"},',
+                    '{"trait_type":"Points at Mint","value":"', Utils.toString(fragment.userPointsAtMint), '"}',
+                '],',
+                '"image":"', story.ipfsHashImage, '"}'
+            )))
+        ));
+    }
 
     /**
      * @dev Creates a new story proposal. The story will first go through a community vote.
@@ -329,40 +511,37 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
      * @param _ipfsHash IPFS hash of the new chapter's content.
      * @param _choices An array of choices for this new chapter.
      */
-    function addChapter(
-        uint256 _storyId,
-        uint256 _previousChapterIndex,
-        uint256 _previousChapterWinningChoiceIndex,
-        string calldata _ipfsHash,
-        string[] calldata _choices
-    ) external nonReentrant onlyCollaborator(_storyId) storyExists(_storyId) {
-        Story storage story = stories[_storyId];
+function addChapter(
+    uint256 _storyId,
+    uint256 _previousChapterIndex,
+    uint256 _previousChapterWinningChoiceIndex,
+    string calldata _ipfsHash,
+    string[] calldata _choices
+) external nonReentrant onlyCollaborator(_storyId) storyExists(_storyId) {
+    Story storage story = stories[_storyId];
 
-        // Validation (remove vote duration check)
-        if (story.status != StoryStatus.ACTIVE) revert CannotAddChapterToNonActiveStory();
-        if (_previousChapterIndex >= story.chapters.length) revert InvalidPreviousChapterIndex();
+    if (story.status != StoryStatus.ACTIVE) revert CannotAddChapterToNonActiveStory();
+    if (_previousChapterIndex >= story.chapters.length) revert InvalidPreviousChapterIndex();
 
-        Chapter storage prevChapter = story.chapters[_previousChapterIndex];
-        if (!prevChapter.isResolved) revert PreviousChapterNotResolved();
-        if (prevChapter.winningChoiceIndex != _previousChapterWinningChoiceIndex) revert InvalidPreviousChapterIndex();
+    Chapter storage prevChapter = story.chapters[_previousChapterIndex];
+    if (!prevChapter.isResolved) revert PreviousChapterNotResolved();
+    if (prevChapter.winningChoiceIndex != _previousChapterWinningChoiceIndex) revert InvalidPreviousChapterIndex();
 
-        if (story.chapters.length > 1 && !story.chapters[story.currentChapterIndex].isResolved) {
-            revert ChapterCannotBeAddedToLiveVote();
-        }
-
-        require(bytes(_ipfsHash).length > 0, "Chapter content hash cannot be empty");
-
-        uint256 newChapterIndex = story.chapters.length;
-        
-        // Update previous chapter's winning choice
-        prevChapter.choices[_previousChapterWinningChoiceIndex].nextChapterIndex = newChapterIndex;
-
-        // Create new chapter
-        _createNewChapter(story, newChapterIndex, _storyId, _ipfsHash, _choices);
-        
-        story.currentChapterIndex = newChapterIndex;
-        emit ChapterAdded(_storyId, newChapterIndex, _ipfsHash, block.timestamp + CHAPTER_VOTING_PERIOD);
+    if (story.chapters.length > 1 && !story.chapters[story.currentChapterIndex].isResolved) {
+        revert ChapterCannotBeAddedToLiveVote();
     }
+
+    if (bytes(_ipfsHash).length == 0) revert InvalidInput();
+
+    uint256 newChapterIndex = story.chapters.length;
+    
+    prevChapter.choices[_previousChapterWinningChoiceIndex].nextChapterIndex = newChapterIndex;
+
+    _createNewChapter(story, newChapterIndex, _storyId, _ipfsHash, _choices);
+    
+    story.currentChapterIndex = newChapterIndex;
+    emit ChapterAdded(_storyId, newChapterIndex, _ipfsHash, block.timestamp + CHAPTER_VOTING_PERIOD);
+}
 
     /**
      * @dev Internal function to create a new chapter
@@ -414,9 +593,20 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         if (chapter.hasVoted[msg.sender]) revert AlreadyVoted();
         if (_choiceIndex >= chapter.choices.length) revert InvalidChoice();
 
+        // NEW: Track early voters (within first 6 hours)
+        if (block.timestamp <= chapter.createdAt + EARLY_VOTE_PERIOD) {
+            earlyVoters[_storyId][_chapterIndex][msg.sender] = true;
+        }
+
+        // NEW: Update user participation stats
+        if (!_hasUserParticipatedInStory(msg.sender, _storyId)) {
+            userProfiles[msg.sender].storiesParticipated++;
+        }
+
         chapter.choices[_choiceIndex].voteCount++;
         chapter.voteCountSum++;
         chapter.hasVoted[msg.sender] = true;
+        userVoteChoices[_storyId][_chapterIndex][msg.sender] = _choiceIndex;
 
         emit VoteCast(_storyId, _chapterIndex, msg.sender, _choiceIndex);
     }
@@ -449,12 +639,103 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
         chapter.winningChoiceIndex = winningChoiceIndex;
         chapter.isResolved = true;
 
+        // NEW: Award points and mint NFTs for winning voters
+        _processWinningVoters(_storyId, _chapterIndex, winningChoiceIndex);
+
         emit ChapterResolved(
             _storyId,
             _chapterIndex,
             winningChoiceIndex,
             chapter.choices[winningChoiceIndex].text
         );
+    }
+
+    /**
+     * @dev End a story - can be called by writer or collaborators
+     * Awards completion bonus to all participants
+     */
+    function endStory(uint256 _storyId) external onlyCollaborator(_storyId) storyExists(_storyId) {
+        Story storage story = stories[_storyId];
+        
+        if (story.status != StoryStatus.ACTIVE) revert InvalidStoryStatus();
+        if (story.chapters.length == 0) revert InvalidInput();
+        
+        if (story.chapters.length > 0) {
+            Chapter storage currentChapter = story.chapters[story.currentChapterIndex];
+            if (!currentChapter.isResolved && block.timestamp < currentChapter.voteEndTime) {
+                revert InvalidChapterStatus();
+            }
+        }
+        
+        story.status = StoryStatus.COMPLETED;
+        _awardStoryCompletionBonus(_storyId);
+        
+        emit StoryCompleted(_storyId, story.chapters.length, _getStoryParticipantCount(_storyId));
+    }
+
+    /**
+     * @dev Award completion bonus to all story participants
+     */
+    function _awardStoryCompletionBonus(uint256 _storyId) internal {
+        // Story storage story = stories[_storyId];
+        
+        // Create a mapping to track unique participants
+        // address[] memory participants = new address[](0);
+        
+        // We'll award bonus through a claimable system to avoid gas issues
+        // Mark story as having completion bonus available
+        storyCompletionBonusAvailable[_storyId] = true;
+    }
+
+    /**
+     * @dev Users claim their story completion bonus
+     */
+    function claimStoryCompletionBonus(uint256 _storyId) external nonReentrant storyExists(_storyId) {
+        Story storage story = stories[_storyId];
+        
+        if (story.status != StoryStatus.COMPLETED) revert InvalidStoryStatus();
+        if (!storyCompletionBonusAvailable[_storyId]) revert InvalidInput();
+        if (hasClaimedCompletionBonus[_storyId][msg.sender]) revert AlreadyVoted();
+        if (!_hasUserParticipatedInStory(msg.sender, _storyId)) revert Unauthorized();
+        
+        hasClaimedCompletionBonus[_storyId][msg.sender] = true;
+        _awardPoints(msg.sender, POINTS_STORY_COMPLETION, "Story completion bonus");
+        
+        emit StoryCompletionBonusAwarded(msg.sender, _storyId, POINTS_STORY_COMPLETION);
+    }
+
+    /**
+     * @dev Pause a story (emergency function)
+     */
+    function pauseStory(uint256 _storyId) external onlyStoryOwner(_storyId) storyExists(_storyId) {
+        Story storage story = stories[_storyId];
+        if (story.status != StoryStatus.ACTIVE) revert InvalidStoryStatus();
+        story.status = StoryStatus.PAUSED;
+    }
+
+    /**
+     * @dev Resume a paused story
+     */
+    function resumeStory(uint256 _storyId) external onlyStoryOwner(_storyId) storyExists(_storyId) {
+        Story storage story = stories[_storyId];
+        if (story.status != StoryStatus.PAUSED) revert InvalidStoryStatus();
+        story.status = StoryStatus.ACTIVE;
+    }
+
+    /**
+     * @dev Get count of unique participants in a story
+     */
+    function _getStoryParticipantCount(uint256 _storyId) internal view returns (uint256) {
+        Story storage story = stories[_storyId];
+        
+        // Simple approach: count votes across all chapters
+        // In a more sophisticated version, you'd track unique addresses
+        uint256 totalVotes = 0;
+        for (uint256 i = 0; i < story.chapters.length; i++) {
+            totalVotes += story.chapters[i].voteCountSum;
+        }
+        
+        return totalVotes; // Approximation - actual unique users would be lower
     }
 
     // --- Collaborator Management ---
@@ -501,7 +782,8 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
     // --- Required Overrides for Multiple Inheritance ---
 
     function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
-        return super.tokenURI(tokenId);
+        require(_ownerOf(tokenId) != address(0), "Token does not exist");
+        return generateTokenURI(tokenId);
     }
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool) {
@@ -543,6 +825,91 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
             chapter.isResolved,
             chapter.voteCountSum
         );
+    }
+
+    /**
+     * @dev Process winning voters - award points and mint NFTs
+     */
+    function _processWinningVoters(uint256 _storyId, uint256 _chapterIndex, uint256 _winningChoiceIndex) internal {
+        // Get all voters who voted for winning choice
+        // Note: We need to track voters during voting, so modify the voting storage
+        
+        // For now, we'll mint NFTs in a separate function call due to gas limits
+        // In production, you might want to use a keeper or batch processing
+    }
+
+    /**
+     * @dev Users claim their own NFT after winning (much better!)
+     */
+    function claimWinnerFragment(
+        uint256 _storyId,
+        uint256 _chapterIndex
+    ) external nonReentrant storyExists(_storyId) chapterExists(_storyId, _chapterIndex) {
+        Story storage story = stories[_storyId];
+        Chapter storage chapter = story.chapters[_chapterIndex];
+        
+        require(chapter.isResolved, "Chapter not resolved yet");
+        require(chapter.hasVoted[msg.sender], "You did not vote");
+        
+        // Check if user voted for winning choice
+        uint256 userChoice = userVoteChoices[_storyId][_chapterIndex][msg.sender];
+        require(userChoice == chapter.winningChoiceIndex, "You didn't vote for winning choice");
+        
+        // Check if already claimed
+        require(!hasClaimedFragment[_storyId][_chapterIndex][msg.sender], "Already claimed");
+        
+        // Award points
+        uint256 points = POINTS_WINNING_VOTE;
+        
+        // Bonus points for early voting
+        if (earlyVoters[_storyId][_chapterIndex][msg.sender]) {
+            points += POINTS_EARLY_VOTE;
+        }
+        
+        // Award referral points to referrer (only on first win)
+        address referrer = userProfiles[msg.sender].referrer;
+        if (referrer != address(0) && userProfiles[msg.sender].winningVotes == 0) {
+            _awardPoints(referrer, POINTS_REFERRAL, "Referral bonus");
+        }
+        
+        _awardPoints(msg.sender, points, "Winning vote");
+        userProfiles[msg.sender].winningVotes++;
+        
+        // Mark as claimed
+        hasClaimedFragment[_storyId][_chapterIndex][msg.sender] = true;
+        
+        // Mint NFT
+        uint256 tokenId = _loreFragmentTokenIdCounter++;
+        _safeMint(msg.sender, tokenId);
+        
+        // Store fragment data
+        loreFragmentData[tokenId] = LoreFragmentData({
+            storyId: _storyId,
+            chapterId: _chapterIndex,
+            choiceIndex: userChoice,
+            mintTimestamp: block.timestamp,
+            userPointsAtMint: userProfiles[msg.sender].totalPoints,
+            rarity: getUserRarityTier(msg.sender)
+        });
+        
+        // Track user's NFTs
+        userOwnedFragments[msg.sender].push(tokenId);
+        
+        emit LoreFragmentMinted(msg.sender, _storyId, _chapterIndex, tokenId);
+    }
+
+    /**
+     * @dev Check if user has participated in a story
+     */
+    function _hasUserParticipatedInStory(address _user, uint256 _storyId) internal view returns (bool) {
+        // Simple check - iterate through story chapters to see if user voted
+        Story storage story = stories[_storyId];
+        for (uint256 i = 0; i < story.chapters.length; i++) {
+            if (story.chapters[i].hasVoted[_user]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -635,27 +1002,6 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
     }
 
     /**
-     * @dev Gets basic story information (lighter version).
-     * @param _storyId The ID of the story.
-     */
-    function getStoryBasicInfo(uint256 _storyId) external view storyExists(_storyId) returns (
-        string memory title,
-        string memory summary,
-        address writer,
-        StoryStatus status,
-        uint256 totalChapters
-    ) {
-        Story storage story = stories[_storyId];
-        return (
-            story.title,
-            story.summary,
-            story.writer,
-            story.status,
-            story.chapters.length
-        );
-    }
-
-    /**
      * @dev Gets the total number of chapters for a story.
      * @param _storyId The ID of the story.
      */
@@ -709,69 +1055,6 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
     }
 
     /**
-     * @dev Gets basic chapter info without choices (lighter version).
-     * @param _storyId The ID of the story.
-     * @param _chapterIndex The index of the chapter.
-     */
-    function getChapterBasicInfo(uint256 _storyId, uint256 _chapterIndex) external view storyExists(_storyId) chapterExists(_storyId, _chapterIndex) returns (
-        uint256 chapterId,
-        string memory ipfsHash,
-        uint256 createdAt,
-        uint256 voteEndTime,
-        uint256 winningChoiceIndex,
-        bool isResolved,
-        uint256 voteCountSum,
-        uint256 totalChoices
-    ) {
-        Chapter storage chapter = stories[_storyId].chapters[_chapterIndex];
-        return (
-            chapter.chapterId,
-            chapter.ipfsHash,
-            chapter.createdAt,
-            chapter.voteEndTime,
-            chapter.winningChoiceIndex,
-            chapter.isResolved,
-            chapter.voteCountSum,
-            chapter.choices.length
-        );
-    }
-
-    /**
-     * @dev Gets multiple stories' basic info at once (for listing pages).
-     * @param _startIndex Starting story ID.
-     * @param _count Number of stories to retrieve.
-     */
-    function getMultipleStoriesBasicInfo(uint256 _startIndex, uint256 _count) external view returns (
-        uint256[] memory storyIds,
-        string[] memory titles,
-        address[] memory writers,
-        StoryStatus[] memory statuses
-    ) {
-        uint256 totalStories = _storyIdCounter;
-        uint256 actualCount = _count;
-        
-        // Adjust count if it exceeds available stories
-        if (_startIndex + _count > totalStories) {
-            actualCount = totalStories > _startIndex ? totalStories - _startIndex : 0;
-        }
-        
-        storyIds = new uint256[](actualCount);
-        titles = new string[](actualCount);
-        writers = new address[](actualCount);
-        statuses = new StoryStatus[](actualCount);
-        
-        for (uint256 i = 0; i < actualCount; i++) {
-            uint256 storyId = _startIndex + i;
-            if (stories[storyId].writer != address(0)) { // Story exists
-                storyIds[i] = storyId;
-                titles[i] = stories[storyId].title;
-                writers[i] = stories[storyId].writer;
-                statuses[i] = stories[storyId].status;
-            }
-        }
-    }
-
-    /**
      * @dev Checks if voting is currently active for a chapter.
      * @param _storyId The ID of the story.
      * @param _chapterIndex The index of the chapter.
@@ -790,5 +1073,88 @@ contract EtherianChronicle is ERC721, ERC721URIStorage, Ownable, ReentrancyGuard
 
     function getVotingPeriods() external pure returns (uint256 proposalPeriod, uint256 chapterPeriod) {
         return (PROPOSAL_VOTING_PERIOD, CHAPTER_VOTING_PERIOD);
+    }
+
+    /**
+     * @dev Get user's rarity tier based on points
+     */
+    function getUserRarityTier(address _user) public view returns (RarityTier) {
+        uint256 points = userProfiles[_user].totalPoints;
+        
+        if (points >= 1000) return RarityTier.LEGENDARY;
+        if (points >= 500) return RarityTier.EPIC;
+        if (points >= 100) return RarityTier.RARE;
+        return RarityTier.COMMON;
+    }
+
+    /**
+     * @dev Get user profile details
+     */
+    function getUserProfile(address _user) external view returns (UserProfile memory) {
+        return userProfiles[_user];
+    }
+
+    /**
+     * @dev Get leaderboard entries
+     */
+    function getLeaderboard(uint256 _start, uint256 _count) external view returns (LeaderboardEntry[] memory) {
+        require(_start < leaderboardCount, "Start index out of bounds");
+        
+        uint256 end = _start + _count;
+        if (end > leaderboardCount) {
+            end = leaderboardCount;
+        }
+        
+        LeaderboardEntry[] memory result = new LeaderboardEntry[](end - _start);
+        for (uint256 i = _start; i < end; i++) {
+            result[i - _start] = leaderboard[i];
+        }
+        
+        return result;
+    }
+
+    /**
+     * @dev Get user's owned fragment token IDs
+     */
+    function getUserFragments(address _user) external view returns (uint256[] memory) {
+        return userOwnedFragments[_user];
+    }
+
+    /**
+     * @dev Get fragment data
+     */
+    function getFragmentData(uint256 _tokenId) external view returns (LoreFragmentData memory) {
+        return loreFragmentData[_tokenId];
+    }
+
+    /**
+     * @dev Check if user can claim NFT for a chapter
+     */
+    function canClaimFragment(uint256 _storyId, uint256 _chapterIndex, address _user) 
+        external view storyExists(_storyId) chapterExists(_storyId, _chapterIndex) returns (bool) {
+        
+        Chapter storage chapter = stories[_storyId].chapters[_chapterIndex];
+        
+        if (!chapter.isResolved) return false;
+        if (!chapter.hasVoted[_user]) return false;
+        if (hasClaimedFragment[_storyId][_chapterIndex][_user]) return false;
+        
+        uint256 userChoice = userVoteChoices[_storyId][_chapterIndex][_user];
+        return userChoice == chapter.winningChoiceIndex;
+    }
+
+    /**
+     * @dev Check if user can claim story completion bonus
+     */
+    function canClaimCompletionBonus(uint256 _storyId, address _user) 
+        external view storyExists(_storyId) returns (bool) {
+        
+        Story storage story = stories[_storyId];
+        
+        if (story.status != StoryStatus.COMPLETED) return false;
+        if (!storyCompletionBonusAvailable[_storyId]) return false;
+        if (hasClaimedCompletionBonus[_storyId][_user]) return false;
+        
+        return _hasUserParticipatedInStory(_user, _storyId);
     }
 }

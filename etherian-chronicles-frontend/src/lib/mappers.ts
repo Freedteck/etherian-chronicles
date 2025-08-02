@@ -86,6 +86,53 @@ export interface Story {
   currentChapterIndex: number;
 }
 
+export interface UserProfile {
+  totalPoints: number;
+  storiesParticipated: number;
+  winningVotes: number;
+  referrer: string;
+  referralCount: number;
+  isRegistered: boolean;
+  registeredAt: number;
+}
+
+export interface LoreFragmentData {
+  storyId: number;
+  chapterId: number;
+  choiceIndex: number;
+  mintTimestamp: number;
+  userPointsAtMint: number;
+  rarity: number; // 0=Common, 1=Rare, 2=Epic, 3=Legendary
+}
+
+export interface LeaderboardEntry {
+  user: string;
+  points: number;
+  winningVotes: number;
+  storiesParticipated: number;
+  referralCount: number;
+}
+
+export interface ClaimableNFT {
+  storyId: number;
+  chapterIndex: number;
+  storyTitle: string;
+  choiceIndex: number;
+  chapterTitle?: string;
+  estimatedPoints: number;
+  isEarlyVote: boolean;
+  image?: string; // Optional image for claimable NFTs
+}
+
+export interface ClaimableBonus {
+  storyId: number;
+  storyTitle: string;
+  chapterTitle?: string;
+  bonusPoints: number;
+  type: "completion";
+  image?: string; // Optional image for completion bonuses
+}
+
 // Mapping functions
 export const mapChoice = (rawChoice: any): Choice => ({
   text: rawChoice?.text?.toString(),
@@ -182,3 +229,30 @@ export const mapStory = (rawStory: any): Story => ({
 // Helper function to map story collaborators (already string array, no mapping needed)
 export const mapStoryCollaborators = (rawCollaborators: string[]): string[] =>
   rawCollaborators;
+
+export const mapUserProfile = (rawProfile: any): UserProfile => ({
+  totalPoints: Number(rawProfile.totalPoints),
+  storiesParticipated: Number(rawProfile.storiesParticipated),
+  winningVotes: Number(rawProfile.winningVotes),
+  referrer: rawProfile.referrer,
+  referralCount: Number(rawProfile.referralCount),
+  isRegistered: rawProfile.isRegistered,
+  registeredAt: Number(rawProfile.registeredAt),
+});
+
+export const mapLoreFragmentData = (rawFragment: any): LoreFragmentData => ({
+  storyId: Number(rawFragment.storyId),
+  chapterId: Number(rawFragment.chapterId),
+  choiceIndex: Number(rawFragment.choiceIndex),
+  mintTimestamp: Number(rawFragment.mintTimestamp),
+  userPointsAtMint: Number(rawFragment.userPointsAtMint),
+  rarity: Number(rawFragment.rarity),
+});
+
+export const mapLeaderboardEntry = (rawEntry: any): LeaderboardEntry => ({
+  user: rawEntry.user,
+  points: Number(rawEntry.points),
+  winningVotes: Number(rawEntry.winningVotes),
+  storiesParticipated: Number(rawEntry.storiesParticipated),
+  referralCount: Number(rawEntry.referralCount),
+});

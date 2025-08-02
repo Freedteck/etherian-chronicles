@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { mapChapterDetails, mapStoryDetails } from "@/lib/mappers";
+import {
+  ClaimableBonus,
+  ClaimableNFT,
+  mapChapterDetails,
+  mapLeaderboardEntry,
+  mapLoreFragmentData,
+  mapStoryDetails,
+  mapUserProfile,
+} from "@/lib/mappers";
 import { contract, getIpfsDetails } from "@/lib/utils";
 import {
   getContractEvents,
@@ -75,7 +83,9 @@ export const getActiveStories = async () => {
 export const getActiveProposals = async () => {
   const { stories: proposals, isStoryLoading: isProposalLoading } =
     await getStories();
-  const activeProposals = proposals.filter((proposal) => proposal?.status === 0);
+  const activeProposals = proposals.filter(
+    (proposal) => proposal?.status === 0
+  );
   return { activeProposals, isProposalLoading };
 };
 
@@ -239,4 +249,309 @@ export const getVoteCastEvents = async () => {
   return await getContractEvent(
     "VoteCast(uint256 indexed storyId, uint256 indexed chapterId, address indexed voter, uint256 choiceIndex)"
   );
+};
+
+// User Profile Functions
+const getUserProfile = async (userAddress: string) => {
+  if (!userAddress) return null;
+  try {
+    const rawProfile = await readContract({
+      contract: contract,
+      method: "getUserProfile",
+      params: [userAddress],
+    });
+
+    return mapUserProfile(rawProfile);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error;
+  }
+};
+
+const getUserFragments = async (userAddress: string) => {
+  if (!userAddress) return [];
+  try {
+    const fragmentIds = await readContract({
+      contract: contract,
+      method: "getUserFragments",
+      params: [userAddress],
+    });
+    return fragmentIds.map((id: any) => Number(id));
+  } catch (error) {
+    console.error("Error fetching user fragments:", error);
+    throw error;
+  }
+};
+
+const getFragmentData = async (tokenId: number) => {
+  try {
+    const rawFragment = await readContract({
+      contract: contract,
+      method: "getFragmentData",
+      params: [BigInt(tokenId)],
+    });
+    console.log("Raw fragment data:", rawFragment);
+
+    return mapLoreFragmentData(rawFragment);
+  } catch (error) {
+    console.error("Error fetching fragment data:", error);
+    throw error;
+  }
+};
+
+const getTokenURI = async (tokenId: number) => {
+  try {
+    const tokenURI = await readContract({
+      contract: contract,
+      method: "tokenURI",
+      params: [BigInt(tokenId)],
+    });
+    return tokenURI;
+  } catch (error) {
+    console.error("Error fetching token URI:", error);
+    throw error;
+  }
+};
+
+// Claimable NFTs
+const canClaimFragment = async (
+  storyId: number,
+  chapterIndex: number,
+  userAddress: string
+) => {
+  if (!userAddress) return false;
+  try {
+    const canClaim = await readContract({
+      contract: contract,
+      method: "canClaimFragment",
+      params: [BigInt(storyId), BigInt(chapterIndex), userAddress],
+    });
+    return canClaim;
+  } catch (error) {
+    console.error("Error checking claimable fragment:", error);
+    return false;
+  }
+};
+
+const canClaimCompletionBonus = async (
+  storyId: number,
+  userAddress: string
+) => {
+  if (!userAddress) return false;
+  try {
+    const canClaim = await readContract({
+      contract: contract,
+      method: "canClaimCompletionBonus",
+      params: [BigInt(storyId), userAddress],
+    });
+    return canClaim;
+  } catch (error) {
+    console.error("Error checking completion bonus:", error);
+    return false;
+  }
+};
+
+// Leaderboard
+export const getLeaderboard = async (start: number = 0, count: number = 50) => {
+  try {
+    const rawLeaderboard = await readContract({
+      contract: contract,
+      method: "getLeaderboard",
+      params: [BigInt(start), BigInt(count)],
+    });
+    return rawLeaderboard.map(mapLeaderboardEntry);
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    throw error;
+  }
+};
+
+export const getUserCompleteProfile = async (userAddress: string) => {
+  if (!userAddress) return null;
+
+  try {
+    // Get basic profile
+    const profile = await getUserProfile(userAddress);
+
+    // Get owned NFTs
+    const fragmentIds = await getUserFragments(userAddress);
+    const ownedNFTs = [];
+
+    for (const tokenId of fragmentIds) {
+      const fragmentData = await getFragmentData(tokenId);
+      const storyDetails = await readContract({
+        contract: contract,
+        method: "getStoryDetails",
+        params: [BigInt(fragmentData.storyId)],
+      });
+      const story = mapStoryDetails(storyDetails);
+
+      ownedNFTs.push({
+        tokenId,
+        ...fragmentData,
+        storyTitle: story.title,
+        tokenURI: await getTokenURI(tokenId),
+        image: story.ipfsHashImage, // Use story image for NFT
+      });
+    }
+
+    // Get claimable NFTs
+    const claimableNFTs: ClaimableNFT[] = [];
+    const claimableBonuses: ClaimableBonus[] = [];
+
+    const totalStoriesCount = await totalStories();
+
+    for (let storyId = 0; storyId < totalStoriesCount; storyId++) {
+      const storyDetails = await readContract({
+        contract: contract,
+        method: "getStoryDetails",
+        params: [BigInt(storyId)],
+      });
+      const story = mapStoryDetails(storyDetails);
+
+      // Check each chapter for claimable NFTs
+      for (
+        let chapterIndex = 0;
+        chapterIndex < story.totalChapters;
+        chapterIndex++
+      ) {
+        const canClaim = await canClaimFragment(
+          storyId,
+          chapterIndex,
+          userAddress
+        );
+        if (canClaim) {
+          // Check if early voter
+          const isEarlyVote = await readContract({
+            contract: contract,
+            method: "earlyVoters",
+            params: [BigInt(storyId), BigInt(chapterIndex), userAddress],
+          });
+
+          const rawChapter = await readContract({
+            contract: contract,
+            method: "getChapter",
+            params: [BigInt(storyId), BigInt(chapterIndex)],
+          });
+          const chapter = mapChapterDetails(rawChapter);
+          const chapterContent = await getIpfsDetails(chapter.ipfsHash);
+
+          claimableNFTs.push({
+            storyId,
+            chapterIndex,
+            storyTitle: story.title,
+            chapterTitle: chapterContent.title,
+            choiceIndex: chapterContent?.votingOptions?.findIndex(
+              (option: any) => option.owner === userAddress
+            ),
+            estimatedPoints: isEarlyVote ? 75 : 50, // 50 base + 25 early bonus
+            isEarlyVote,
+            image: story.ipfsHashImage, // Use story image for claimable NFT
+          });
+        }
+      }
+
+      // Check completion bonus
+      const canClaimCompletion = await canClaimCompletionBonus(
+        storyId,
+        userAddress
+      );
+      if (canClaimCompletion) {
+        claimableBonuses.push({
+          storyId,
+          storyTitle: story.title,
+          bonusPoints: 100,
+          type: "completion",
+          image: story.ipfsHashImage,
+        });
+      }
+    }
+
+    console.log("User complete profile:", {
+      profile,
+      ownedNFTs,
+      claimableNFTs,
+      claimableBonuses,
+    });
+
+    return {
+      profile,
+      ownedNFTs,
+      claimableNFTs,
+      claimableBonuses,
+    };
+  } catch (error) {
+    console.error("Error fetching complete user profile:", error);
+    throw error;
+  }
+};
+
+export const registerUser = async (referrerAddress: string, account: any) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "registerUser",
+      [referrerAddress || "0x0000000000000000000000000000000000000000"],
+      account
+    );
+    return transactionHash;
+  } catch (error) {
+    console.error("Error registering user:", error);
+    throw error;
+  }
+};
+
+export const claimWinnerFragment = async (
+  storyId: number,
+  chapterIndex: number,
+  account: any
+) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "claimWinnerFragment",
+      [BigInt(storyId), BigInt(chapterIndex)],
+      account
+    );
+    setTimeout(async () => {
+      await getUserCompleteProfile(account?.address); // Refresh user profile after claiming
+    }, 1000); // Delay to ensure state updates
+    return transactionHash;
+  } catch (error) {
+    console.error("Error claiming winner fragment:", error);
+    throw error;
+  }
+};
+
+export const claimStoryCompletionBonus = async (
+  storyId: number,
+  account: any
+) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "claimStoryCompletionBonus",
+      [BigInt(storyId)],
+      account
+    );
+
+    return transactionHash;
+  } catch (error) {
+    console.error("Error claiming completion bonus:", error);
+    throw error;
+  }
+};
+
+export const endStory = async (storyId: number, account: any) => {
+  try {
+    const transactionHash = await executeTransaction(
+      "endStory",
+      [BigInt(storyId)],
+      account
+    );
+    setTimeout(async () => {
+      await getActiveStories(); // Refresh active stories after ending
+    }, 1000); // Delay to ensure state updates
+    return transactionHash;
+  } catch (error) {
+    console.error("Error ending story:", error);
+    throw error;
+  }
 };
