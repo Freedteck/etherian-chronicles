@@ -82,9 +82,9 @@ npm install
 Create a file named `.env.local` in the root of the project and paste the following values:
 
 ```env
-VITE_THIRDWEB_CLIENT_ID=517007e6ba4b15eaaad1074860c4c1f0
-VITE_PINATA_GATEWAY=black-harsh-ant-656.mypinata.cloud
-VITE_PINATA_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_THIRDWEB_CLIENT_ID= <YOUR THIRDWEB CLIENT ID>
+VITE_PINATA_GATEWAY= <YOUR PINATA GATEWAY>
+VITE_PINATA_JWT= <YOUR PINATA JWT>
 ```
 
 
