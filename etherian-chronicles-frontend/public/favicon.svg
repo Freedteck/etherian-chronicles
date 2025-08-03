@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Background rounded rectangle -->
+  <defs>
+    <linearGradient id="primary-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed" /> <!-- Tailwind's primary (e.g., purple-600) -->
+      <stop offset="100%" stop-color="#a78bfa" /> <!-- lighter version (primary/80) -->
+    </linearGradient>
+  </defs>
+  
+  <rect width="64" height="64" rx="12" fill="url(#primary-gradient)" />
+  
+  <!-- Crown Icon (Lucide crown path) -->
+  <path 
+    d="M2 20l10 6 10-18 10 18 10-6 2 26H0l2-26z" 
+    transform="translate(10 4) scale(1.0)" 
+    fill="white" 
+  />
+</svg>
