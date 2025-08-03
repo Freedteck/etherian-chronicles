@@ -140,6 +140,30 @@ const Header = () => {
                   </Button>
                 </Link>
               </div>
+              <div className="pt-2 w-full">
+                <ConnectButton
+                  client={client}
+                  wallets={wallets}
+                  chain={etherlinkTestnet}
+                  // accountAbstraction={{
+                  //   chain: etherlinkTestnet, // replace with the chain you want
+                  //   sponsorGas: true,
+                  // }}
+                  connectModal={{ size: "compact" }}
+                  theme={darkTheme({
+                    colors: {
+                      secondaryIconHoverColor: "hsl(240, 6%, 94%)",
+                      secondaryIconColor: "hsl(251, 4%, 50%)",
+                      connectedButtonBg: "hsl(217.2 32.6% 17.5%)",
+                      connectedButtonBgHover: "hsl(231, 11%, 12%)",
+                      accentButtonText: "hsl(240, 7%, 94%)",
+                      modalBg: "hsl(228, 12%, 8%)",
+                      primaryButtonBg: "hsl(270, 60%, 45%)",
+                      primaryButtonText: "hsl(0, 0%, 100%)",
+                    },
+                  })}
+                />
+              </div>
             </div>
           </div>
         )}

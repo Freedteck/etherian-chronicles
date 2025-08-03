@@ -1,12 +1,12 @@
 # Etherian Chronicle
 
-*A community-governed fantasy saga where readers don't just follow the story — they **shape** it, vote by vote, chapter by chapter, on-chain.*
+_A community-governed fantasy saga where readers don't just follow the story — they **shape** it, vote by vote, chapter by chapter, on-chain._
 
 ---
 
-##  Overview
+## Overview
 
-**Etherian Chronicle** is a decentralized, collaborative storytelling platform that transforms readers into co-authors. Powered by **on-chain voting**, **dynamic NFT rewards**, and the blazing speed of **Etherlink**, it allows users to vote in real time on key narrative decisions — and see the next chapter unfold *instantly* based on collective consensus.
+**Etherian Chronicle** is a decentralized, collaborative storytelling platform that transforms readers into co-authors. Powered by **on-chain voting**, **dynamic NFT rewards**, and the blazing speed of **Etherlink**, it allows users to vote in real time on key narrative decisions — and see the next chapter unfold _instantly_ based on collective consensus.
 
 Forget passive reading. Every chapter is a cliffhanger. Every vote is a turning point. And every decision is recorded immutably on-chain.
 
@@ -14,14 +14,14 @@ Forget passive reading. Every chapter is a cliffhanger. Every vote is a turning 
 
 ## Features
 
-- Real-time on-chain voting on chapter decisions  
-- Chapter-by-chapter story progression driven by community consensus  
-- Story proposal & approval system  
--  IPFS storage for story content  
-- Instant wallet connection using thirdweb  
-- Dynamic UI with live vote counts  
+- Real-time on-chain voting on chapter decisions
+- Chapter-by-chapter story progression driven by community consensus
+- Story proposal & approval system
+- IPFS storage for story content
+- Instant wallet connection using thirdweb
+- Dynamic UI with live vote counts
 - NFT Rewards System:
-  
+
 ---
 
 ## How It Works
@@ -46,21 +46,22 @@ Forget passive reading. Every chapter is a cliffhanger. Every vote is a turning 
 
 ## Tech Stack
 
-| Layer        | Technology              |
-|--------------|--------------------------|
-| Frontend     | TypeScript, Tailwind CSS |
-| Web3 Auth    | thirdweb SDK             |
-| Smart Contracts | Solidity (Etherlink) |
-| Blockchain   | Etherlink (low-fee, fast)|
-| Storage      | IPFS via Pinata          |
-| Randomness   | Pseudo-random (MVP)      |
+| Layer           | Technology                |
+| --------------- | ------------------------- |
+| Frontend        | TypeScript, Tailwind CSS  |
+| Web3 Auth       | thirdweb SDK              |
+| Smart Contracts | Solidity (Etherlink)      |
+| Blockchain      | Etherlink (low-fee, fast) |
+| Storage         | IPFS via Pinata           |
+| Randomness      | Pseudo-random (MVP)       |
 
 ---
 
 ## Live Demo
 
-- 🌐 [https://etherian-chronicles.vercel.app/](https://etherian-chronicles.vercel.app/)  
-- ---
+- 🌐 [https://etherian-chronicles.vercel.app/](https://etherian-chronicles.vercel.app/)
+
+---
 
 ## Getting Started Locally
 
@@ -69,7 +70,7 @@ Forget passive reading. Every chapter is a cliffhanger. Every vote is a turning 
 ```bash
 git clone https://github.com/your-repo-link-here
 cd etherian-chronicle
-````
+```
 
 ### 2. Install Dependencies
 
@@ -87,7 +88,6 @@ VITE_PINATA_GATEWAY= <YOUR PINATA GATEWAY>
 VITE_PINATA_JWT= <YOUR PINATA JWT>
 ```
 
-
 ### 4. Start the Development Server
 
 ```bash
@@ -103,15 +103,16 @@ npx hardhat deploy --network etherlink
 
 ---
 
-##  Smart Contracts
+## Smart Contracts
 
-* Contracts handle:
+- Contracts handle:
 
-  * Proposal voting
-  * Chapter outcome voting
-  * NFT minting 
-* Written in **Solidity**, deployed on **Etherlink**
-* Interaction handled via **thirdweb SDK**
+  - Proposal voting
+  - Chapter outcome voting
+  - NFT minting
+
+- Written in **Solidity**, deployed on **Etherlink**
+- Interaction handled via **thirdweb SDK**
 
 ---
 
@@ -120,15 +121,16 @@ npx hardhat deploy --network etherlink
 This project is licensed under the [MIT License](./LICENSE).
 
 —
-##  Inspiration
+
+## Inspiration
 
 > We're not just building a reading platform.
 > We're building a **living, breathing story** — shaped by the community, protected by the blockchain, and brought to life one vote at a time.
 
 ---
 
-##  Post-Hackathon Roadmap
+## Post-Hackathon Roadmap
 
-* Launch DAO-style governance for writers/contributors
-* Add visual generative art to NFTs based on story outcome
-* 🔗 Integrate Chainlink VRF for provable randomness
+- Launch DAO-style governance for writers/contributors
+- Add visual generative art to NFTs based on story outcome
+- 🔗 Integrate Chainlink VRF for provable randomness
