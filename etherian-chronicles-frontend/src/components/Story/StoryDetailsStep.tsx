@@ -70,13 +70,15 @@ const StoryDetailsStep = ({
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      toast(`Uploading ${file.name}...`);
+      toast.loading(`Uploading ${file.name}...`);
       const fileUrl = await uploadFileToPinata(file);
       if (!fileUrl) {
+        toast.dismiss();
         toast.error("Error uploading cover image, Please try again later.");
         return;
       }
       onUpdate({ coverImage: fileUrl });
+      toast.dismiss();
       toast.success(`${file.name} uploaded successfully`);
     }
   };

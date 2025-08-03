@@ -45,14 +45,14 @@ const RegistrationModal = ({ isOpen, onClose }) => {
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Users className="h-5 w-5" />
-            <span>Welcome to Ethterian Chronicles</span>
+            <span>Welcome to Etherian Chronicle</span>
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2 text-muted-foreground">
             <p>
-              Thank you for joining Etherian Chronicles — a decentralized
+              Thank you for joining Etherian Chronicle — a decentralized
               storytelling community where writers, voters, and collaborators
               shape stories together.
             </p>

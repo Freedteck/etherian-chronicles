@@ -110,7 +110,7 @@ const StoryDetail = () => {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast("Link copied!, Share this epic tale with others.");
+    toast("Link copied! Share this epic tale with others.");
   };
 
   const handleResolve = async () => {
