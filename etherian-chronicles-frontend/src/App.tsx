@@ -16,35 +16,54 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import RegistrationModal from "./components/ui/RegistrationModal";
 import { getUserCompleteProfile } from "./data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
+import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
-// const account = useActiveAccount();
+const App = () => {
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const account = useActiveAccount();
 
-// getUserCompleteProfile(account.address);
+  useEffect(() => {
+    if (!account) {
+      return;
+    }
+    const checkProfile = async () => {
+      const user = await getUserCompleteProfile(account.address);
+      if (!user?.profile.isRegistered) {
+        setShowRegistrationModal(true);
+      }
+    };
+    checkProfile();
+  }, [account]);
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/stories" element={<Stories />} />
-            <Route path="/stories/:id" element={<StoryDetail />} />
-            <Route path="/proposals" element={<Proposals />} />
-            <Route path="/proposals/:id" element={<ProposalDetail />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/profile/:userId" element={<Profile />} />
-            <Route path="/create" element={<CreateStory />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <RegistrationModal
+            isOpen={showRegistrationModal}
+            onClose={() => setShowRegistrationModal(false)}
+          />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/stories" element={<Stories />} />
+              <Route path="/stories/:id" element={<StoryDetail />} />
+              <Route path="/proposals" element={<Proposals />} />
+              <Route path="/proposals/:id" element={<ProposalDetail />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/profile/:userId" element={<Profile />} />
+              <Route path="/create" element={<CreateStory />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

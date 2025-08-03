@@ -9,20 +9,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Users } from "lucide-react";
 import { useState } from "react";
+import { registerUser } from "@/data/proposalData";
+import { useActiveAccount } from "thirdweb/react";
 
-const RegistrationModal = ({ isOpen, onClose, onSubmit }) => {
+const RegistrationModal = ({ isOpen, onClose }) => {
   const [referrer, setReferrer] = useState("");
   const [error, setError] = useState("");
+  const account = useActiveAccount();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!/^0x[a-fA-F0-9]{40}$/.test(referrer)) {
-      setError("Please enter a valid Ethereum address.");
-      return;
-    }
+    // if (!/^0x[a-fA-F0-9]{40}$/.test(referrer)) {
+    //   setError("Please enter a valid Ethereum address.");
+    //   return;
+    // }
+    // setError("");
+    const transactionHash = await registerUser(referrer, account);
+    console.log(transactionHash);
 
-    setError("");
-    onSubmit(referrer);
     onClose();
   };
 
