@@ -20,8 +20,8 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ["Inter", "system-ui", "sans-serif"],
-				display: ["Playfair Display", "serif"],
-				serif: ["Merriweather", "serif"],
+				display: ["Work Sans", "sans-serif"],
+				serif: ["Work Sans", "sans-serif"],
 				body: ["Inter", "system-ui", "sans-serif"],
 			},
 			colors: {
