@@ -4,6 +4,7 @@ import { uploadJsonToPinata } from "@/lib/pinata";
 import {
   addChapter,
   createStory,
+  endStory,
   getActiveProposals,
   getActiveStories,
   resolveChapter,
@@ -81,6 +82,8 @@ const StoryContext = ({ children }) => {
         title: formData.title,
         content: formData.content,
         votingOptions: formData.votingOptions,
+        votingQuestion: formData.votingQuestion,
+        isLastChapter: formData.isLastChapter,
         genres: formData.genres,
       };
 
@@ -101,6 +104,17 @@ const StoryContext = ({ children }) => {
       return transactionHash;
     } catch (error) {
       console.error("Error adding chapter:", error);
+      throw error;
+    }
+  };
+
+  const endCurrentStoryStory = async (storyId) => {
+    try {
+      const transactionHash = await endStory(storyId, account);
+      await getStories(); // Refresh stories after ending the story
+      return transactionHash;
+    } catch (error) {
+      console.error("Error ending story:", error);
       throw error;
     }
   };
@@ -170,6 +184,7 @@ const StoryContext = ({ children }) => {
         voteOnChapter: voteOnStoryChapter,
         resolveStoryProposal,
         resolveStoryChapter,
+        endStory: endCurrentStoryStory,
       }}
     >
       {children}

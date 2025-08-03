@@ -61,10 +61,18 @@ const Header = () => {
               </Link>
             )}
           </nav>
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
 
           {/* Connect Button */}
           <div className="hidden md:flex items-center space-x-4">
+            {account && (
+              <Link to="/create">
+                <Button className="btn-mystical w-full">
+                  <Scroll className="h-4 w-4 mr-2" />
+                  Create Story
+                </Button>
+              </Link>
+            )}
             <ConnectButton
               client={client}
               wallets={wallets}

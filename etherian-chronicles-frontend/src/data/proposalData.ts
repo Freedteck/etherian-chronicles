@@ -69,7 +69,7 @@ const getStories = async () => {
 export const getActiveStories = async () => {
   try {
     const { stories, isStoryLoading } = await getStories();
-    console.log("Fetched stories:", stories);
+    // console.log("Fetched stories:", stories);
     const activeStories = stories.filter(
       (story) => story.status === 1 || story.status === 3
     ); // 1: Active, 3: Completed
@@ -290,7 +290,6 @@ const getFragmentData = async (tokenId: number) => {
       method: "getFragmentData",
       params: [BigInt(tokenId)],
     });
-    console.log("Raw fragment data:", rawFragment);
 
     return mapLoreFragmentData(rawFragment);
   } catch (error) {
@@ -467,12 +466,12 @@ export const getUserCompleteProfile = async (userAddress: string) => {
       }
     }
 
-    console.log("User complete profile:", {
-      profile,
-      ownedNFTs,
-      claimableNFTs,
-      claimableBonuses,
-    });
+    // console.log("User complete profile:", {
+    //   profile,
+    //   ownedNFTs,
+    //   claimableNFTs,
+    //   claimableBonuses,
+    // });
 
     return {
       profile,

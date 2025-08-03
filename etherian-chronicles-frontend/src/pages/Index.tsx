@@ -17,6 +17,9 @@ import { StoryDataContext } from "@/contexts/storyDataContext";
 
 const Index = () => {
   const { isLoading, stories, proposals } = useContext(StoryDataContext);
+  const filteredProposals = proposals.filter(
+    (proposal) => proposal?.title !== "csdc"
+  );
 
   const featuredStories = stories
     .map((story) => {
@@ -40,8 +43,11 @@ const Index = () => {
       <StorySlideshow stories={featuredStories} />
 
       {/* Proposals Carousel */}
-      {proposals.length > 0 && (
-        <ProposalsCarousel proposals={proposals} isLoading={isLoading} />
+      {filteredProposals.length > 0 && (
+        <ProposalsCarousel
+          proposals={filteredProposals}
+          isLoading={isLoading}
+        />
       )}
 
       {/* Featured Stories */}

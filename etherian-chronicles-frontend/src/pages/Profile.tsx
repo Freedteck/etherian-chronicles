@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   User,
   Crown,
@@ -38,6 +38,7 @@ const Profile = () => {
     mintLoreFragment,
     mintCompletionFragment,
     userProfile,
+    getUserProfile,
   } = useContext(ProfileDataContext);
   const account = useActiveAccount();
 
@@ -49,6 +50,12 @@ const Profile = () => {
 
   const [activeTab, setActiveTab] = useState("overview");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userId) {
+      getUserProfile({ address: userId });
+    }
+  }, [userId, getUserProfile]);
 
   // Tabs definition
   const tabs = [
@@ -552,7 +559,7 @@ const Profile = () => {
                       key={`bonus-${index}`}
                       nft={bonus}
                       isClaimable={true}
-                      onClaim={mintCompletionFragment}
+                      onClaim={() => mintCompletionFragment(bonus?.storyId)}
                     />
                   ))}
                 </div>

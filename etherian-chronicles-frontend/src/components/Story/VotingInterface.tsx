@@ -59,7 +59,7 @@ const VotingInterface = ({ chapter, onVote, userVote = null }) => {
     <div className="bg-card rounded-xl border border-border p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div>
+        <div className="max-w-2xl">
           <h3 className="text-xl font-display font-semibold text-foreground mb-1">
             {chapter.votingQuestion}
           </h3>

@@ -6,7 +6,10 @@ export const ProfileDataContext = createContext({
   claimableBonuses: [],
   claimableNFTs: [],
   ownedNFTs: [],
+  leaderboard: [],
   isLoading: false,
-  mintLoreFragment: (storyId, chapterIndex): Promise<any> => Promise.resolve(null),
+  mintLoreFragment: (storyId, chapterIndex): Promise<any> =>
+    Promise.resolve(null),
   mintCompletionFragment: (storyId): Promise<any> => Promise.resolve(null),
+  getUserProfile: (account): Promise<any> => Promise.resolve(null),
 });

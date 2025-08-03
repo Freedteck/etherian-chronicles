@@ -33,8 +33,14 @@ const StoryDetail = () => {
   const [showAddChapterModal, setShowAddChapterModal] = useState(false);
   const [story, setStory] = useState(null);
   const account = useActiveAccount();
-  const { isLoading, stories, voteOnChapter, addChapter, resolveStoryChapter } =
-    useContext(StoryDataContext);
+  const {
+    isLoading,
+    stories,
+    voteOnChapter,
+    addChapter,
+    resolveStoryChapter,
+    endStory,
+  } = useContext(StoryDataContext);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -142,6 +148,30 @@ const StoryDetail = () => {
     }
   };
 
+  const handleEndStory = async () => {
+    if (!story) return;
+    toast({
+      title: "Ending Story",
+      description: "Please wait while we end the story.",
+    });
+    try {
+      const transactionHash = await endStory(story.storyId);
+      toast({
+        variant: "success",
+        title: "Story Ended!",
+        description: "The story has been ended successfully.",
+      });
+      console.log(`Story ended successfully: ${transactionHash}`);
+    } catch (error) {
+      console.error("Error ending story:", error);
+      toast({
+        variant: "destructive",
+        title: "Error Ending Story",
+        description: `There was an error ending the story: ${error.message}`,
+      });
+    }
+  };
+
   const handleChapterAdded = async (formData) => {
     toast({
       title: "Adding Chapter",
@@ -236,12 +266,22 @@ const StoryDetail = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                {isAuthorOrCollaborator && !currentChapter.isResolved && (
-                  <Button className="btn-mystical" onClick={handleResolve}>
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Resolve Chapter
-                  </Button>
-                )}
+                {isAuthorOrCollaborator &&
+                  !currentChapter.isResolved &&
+                  !currentChapter.isLastChapter && (
+                    <Button className="btn-mystical" onClick={handleResolve}>
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Resolve Chapter
+                    </Button>
+                  )}
+                {isAuthorOrCollaborator &&
+                  // story.chapters[story.chapters.length - 1].isResolved &&
+                  story.chapters[story.chapters.length - 1].isLastChapter && (
+                    <Button className="btn-mystical" onClick={handleEndStory}>
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      End Story
+                    </Button>
+                  )}
                 <Button
                   variant="default"
                   onClick={handleShare}

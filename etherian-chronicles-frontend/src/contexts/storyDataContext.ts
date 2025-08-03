@@ -17,4 +17,5 @@ export const StoryDataContext = createContext({
   resolveStoryProposal: (storyId: any): Promise<any> => Promise.resolve(null),
   resolveStoryChapter: (storyId: any, chapterId: any): Promise<any> =>
     Promise.resolve(null),
+  endStory: (storyId: any): Promise<any> => Promise.resolve(null),
 });

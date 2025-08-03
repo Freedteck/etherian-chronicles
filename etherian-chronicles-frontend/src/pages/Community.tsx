@@ -1,17 +1,24 @@
-import { Users, Crown, Star, TrendingUp, Award } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import Header from '@/components/Layout/Header';
-import PageBanner from '@/components/Layout/PageBanner';
-import { mockUsers } from '@/data/mockData';
+import { Users, Crown, Star, TrendingUp, Award } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Header from "@/components/Layout/Header";
+import PageBanner from "@/components/Layout/PageBanner";
+import { useContext } from "react";
+import { ProfileDataContext } from "@/contexts/profileDataContext";
+import { Blobbie } from "thirdweb/react";
+import { formatAddress } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import CardLoading from "@/components/ui/cardLoaing";
 
 const Community = () => {
-  const topCreators = mockUsers.sort((a, b) => b.reputation - a.reputation);
+  const { leaderboard, isLoading } = useContext(ProfileDataContext);
+  const navigate = useNavigate();
+  const topCreators = leaderboard;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <PageBanner
         title="Community"
         subtitle="Meet the talented storytellers shaping the EtherianChronicle"
@@ -28,13 +35,17 @@ const Community = () => {
               <div className="text-2xl font-display font-bold text-primary mb-2">
                 2,847
               </div>
-              <div className="text-sm text-muted-foreground">Active Storytellers</div>
+              <div className="text-sm text-muted-foreground">
+                Active Storytellers
+              </div>
             </div>
             <div className="bg-card rounded-xl border border-border p-6 text-center">
               <div className="text-2xl font-display font-bold text-secondary mb-2">
                 156
               </div>
-              <div className="text-sm text-muted-foreground">Stories Created</div>
+              <div className="text-sm text-muted-foreground">
+                Stories Created
+              </div>
             </div>
             <div className="bg-card rounded-xl border border-border p-6 text-center">
               <div className="text-2xl font-display font-bold text-accent mb-2">
@@ -65,57 +76,73 @@ const Community = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {topCreators.map((user, index) => (
-              <div key={user.id} className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <img 
-                      src={user.avatar} 
-                      alt={user.username}
-                      className="w-12 h-12 rounded-full"
-                    />
-                    <div>
-                      <h3 className="font-display font-semibold text-foreground">
-                        {user.username}
-                      </h3>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-3 w-3 text-primary" />
-                        <span className="text-sm text-muted-foreground">
-                          {user.reputation} reputation
-                        </span>
+            {isLoading ? (
+              <CardLoading />
+            ) : (
+              topCreators.map((user, index) => (
+                <div
+                  key={user.user}
+                  className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-all duration-300"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <Blobbie
+                        address={user.user}
+                        className="w-9 h-9 rounded-full"
+                      />
+                      <div>
+                        <h3 className="font-display font-semibold text-foreground">
+                          {formatAddress(user.user)}
+                        </h3>
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-3 w-3 text-primary" />
+                          <span className="text-sm text-muted-foreground">
+                            {user.points} reputation
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    {index === 0 && (
+                      <Badge className="bg-primary/90 text-white">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Top Contributor
+                      </Badge>
+                    )}
                   </div>
-                  {index === 0 && (
-                    <Badge className="bg-primary/90 text-white">
-                      <Crown className="h-3 w-3 mr-1" />
-                      Top Creator
-                    </Badge>
-                  )}
-                </div>
 
-                <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                  <div>
-                    <div className="font-semibold text-foreground">{user.storiesCreated}</div>
-                    <div className="text-muted-foreground">Stories</div>
+                  <div className="grid grid-cols-3 gap-4 text-center text-sm">
+                    <div>
+                      <div className="font-semibold text-foreground">
+                        {user.storiesParticipated}
+                      </div>
+                      <div className="text-muted-foreground">Participation</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-foreground">
+                        {user.winningVotes}
+                      </div>
+                      <div className="text-muted-foreground">Winning Votes</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-foreground">
+                        {user.nfts}
+                      </div>
+                      <div className="text-muted-foreground">NFTs</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-semibold text-foreground">{user.votesTotal}</div>
-                    <div className="text-muted-foreground">Votes</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-foreground">{user.nftsOwned}</div>
-                    <div className="text-muted-foreground">NFTs</div>
-                  </div>
-                </div>
 
-                <div className="mt-4">
-                  <Button variant="outline" className="w-full">
-                    View Profile
-                  </Button>
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => navigate(`/profile/${user.user}`)}
+                    >
+                      View Profile
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
 
@@ -126,25 +153,36 @@ const Community = () => {
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Be Respectful</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                Be Respectful
+              </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Treat fellow storytellers with respect and kindness. Constructive feedback is encouraged.
+                Treat fellow storytellers with respect and kindness.
+                Constructive feedback is encouraged.
               </p>
-              
-              <h3 className="font-semibold text-foreground mb-2">Original Content</h3>
+
+              <h3 className="font-semibold text-foreground mb-2">
+                Original Content
+              </h3>
               <p className="text-sm text-muted-foreground">
                 Share original ideas and respect others' intellectual property.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Collaborative Spirit</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                Collaborative Spirit
+              </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Embrace collaboration and be open to different storytelling perspectives.
+                Embrace collaboration and be open to different storytelling
+                perspectives.
               </p>
-              
-              <h3 className="font-semibold text-foreground mb-2">Quality Focus</h3>
+
+              <h3 className="font-semibold text-foreground mb-2">
+                Quality Focus
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Strive for quality in your contributions and help maintain high standards.
+                Strive for quality in your contributions and help maintain high
+                standards.
               </p>
             </div>
           </div>
