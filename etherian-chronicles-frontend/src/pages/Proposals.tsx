@@ -13,13 +13,16 @@ const Proposals = () => {
   const [filter, setFilter] = useState("all");
   const { proposals, isLoading } = useContext(StoryDataContext);
 
-  const filteredProposals = proposals.filter((proposal) => {
-    const matchesSearch =
-      proposal?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposal?.summary.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === "all" || proposal?.status === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredProposals = proposals
+    .filter((p) => p?.title.toLowerCase() !== "csdc")
+    .filter((proposal) => {
+      const matchesSearch =
+        proposal?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        proposal?.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        proposal?.title !== "csdc";
+      const matchesFilter = filter === "all" || proposal?.status === filter;
+      return matchesSearch && matchesFilter;
+    });
 
   return (
     <div className="min-h-screen bg-background">

@@ -24,7 +24,6 @@ import { getVoteCastEvents, resolveChapter } from "@/data/proposalData";
 import { formatAddress, getTimeAgo } from "@/lib/utils";
 import ProposalLoading from "@/components/ui/proposalLoading";
 import { StoryDataContext } from "@/contexts/storyDataContext";
-import { log } from "console";
 
 const StoryDetail = () => {
   const { id } = useParams();
