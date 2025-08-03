@@ -17,6 +17,7 @@ import RegistrationModal from "./components/ui/RegistrationModal";
 import { getUserCompleteProfile } from "./data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
 import { useEffect, useState } from "react";
+import ScrollToTop from "./components/ui/scroll-to-top";
 
 const queryClient = new QueryClient();
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
             onClose={() => setShowRegistrationModal(false)}
           />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/stories" element={<Stories />} />
