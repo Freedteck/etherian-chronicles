@@ -1,5 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -18,6 +16,7 @@ import { getUserCompleteProfile } from "./data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
 import { useEffect, useState } from "react";
 import ScrollToTop from "./components/ui/scroll-to-top";
+import { Toaster } from "react-hot-toast";
 
 const queryClient = new QueryClient();
 const App = () => {
@@ -41,8 +40,15 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: "#14141f",
+                color: "white",
+              },
+            }}
+          />
           <RegistrationModal
             isOpen={showRegistrationModal}
             onClose={() => setShowRegistrationModal(false)}

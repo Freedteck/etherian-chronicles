@@ -11,6 +11,7 @@ import { Users } from "lucide-react";
 import { useState } from "react";
 import { registerUser } from "@/data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
+import toast from "react-hot-toast";
 
 const RegistrationModal = ({ isOpen, onClose }) => {
   const [referrer, setReferrer] = useState("");
@@ -19,15 +20,23 @@ const RegistrationModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const toastId = toast.loading("Please wait while we register you...");
     // if (!/^0x[a-fA-F0-9]{40}$/.test(referrer)) {
     //   setError("Please enter a valid Ethereum address.");
     //   return;
     // }
     // setError("");
-    const transactionHash = await registerUser(referrer, account);
-    console.log(transactionHash);
-
-    onClose();
+    try {
+      const transactionHash = await registerUser(referrer, account);
+      console.log(transactionHash);
+      toast.dismiss(toastId);
+      toast.success("Registration successfull");
+      onClose();
+    } catch (error) {
+      console.log(error);
+      toast.dismiss(toastId);
+      toast.error("An unexpected error occured, please try again");
+    }
   };
 
   return (
@@ -36,16 +45,16 @@ const RegistrationModal = ({ isOpen, onClose }) => {
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Users className="h-5 w-5" />
-            <span>Welcome to EtherScribe</span>
+            <span>Welcome to Ethterian Chronicles</span>
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2 text-muted-foreground">
             <p>
-              Thank you for joining EtherScribe — a decentralized storytelling
-              community where writers, voters, and collaborators shape stories
-              together.
+              Thank you for joining Etherian Chronicles — a decentralized
+              storytelling community where writers, voters, and collaborators
+              shape stories together.
             </p>
             <p>
               To get started, you can enter the wallet address of the person who

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import StoryDetailsStep from "./StoryDetailsStep";
 import ChapterContentStep from "./ChapterContentStep";
 import CollaboratorsStep from "./CollaboratorsStep";
@@ -11,6 +10,7 @@ import { uploadJsonToPinata } from "@/lib/pinata";
 import { createStory } from "@/data/proposalData";
 import { useActiveAccount } from "thirdweb/react";
 import { boolToBytes } from "thirdweb";
+import toast from "react-hot-toast";
 
 interface Collaborator {
   id: string;
@@ -60,7 +60,6 @@ const steps = [
 const CreateStoryForm = () => {
   const account = useActiveAccount();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
 
   const [formData, setFormData] = useState<FormData>({
@@ -78,7 +77,7 @@ const CreateStoryForm = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loadingToastId, setLoadingToastId] = useState<string | null>(null);
+  // const [loadingToastId, setLoadingToastId] = useState<string | null>(null);
 
   const validateStep = (step: number): boolean => {
     const newErrors: FormErrors = {};
@@ -150,11 +149,9 @@ const CreateStoryForm = () => {
     if (validateStep(currentStep)) {
       setIsSubmitting(true);
 
-      const toastResult = toast({
-        title: "Creating story...",
-        description: "Your story is being created. Please wait.",
-      });
-      setLoadingToastId(toastResult.id);
+      const toastId = toast.loading(
+        "Submitting your story proposal, please wait"
+      );
 
       try {
         const firstChapter = {
@@ -169,14 +166,8 @@ const CreateStoryForm = () => {
         const firstChapterIpfsUrl = await uploadJsonToPinata(firstChapter);
 
         if (!firstChapterIpfsUrl) {
-          if (loadingToastId) {
-            toastResult.dismiss();
-          }
-          toast({
-            variant: "destructive",
-            title: "Error uploading first chapter",
-            description: "Please try again later.",
-          });
+          toast.dismiss(toastId);
+          toast.error("Error uploading first chapter, Please try again later.");
           return;
         }
 
@@ -191,30 +182,17 @@ const CreateStoryForm = () => {
 
         const transactionHash = await createStory(storyData, account);
 
-        if (loadingToastId) {
-          toastResult.dismiss();
-        }
-
         console.log(transactionHash);
 
-        toast({
-          variant: "success",
-          title: "Story created successfully",
-          description: "Your story has been created.",
-        });
+        toast.dismiss(toastId);
+
+        toast.success("Story created successfully");
         navigate("/stories");
       } catch (error) {
-        if (loadingToastId) {
-          toastResult.dismiss();
-        }
-        toast({
-          variant: "destructive",
-          title: "Error creating story",
-          description: error.message,
-        });
+        toast.dismiss(toastId);
+        toast.error(`Error creating story: ${error.message}`);
       } finally {
         setIsSubmitting(false);
-        setLoadingToastId(null);
       }
     }
   };

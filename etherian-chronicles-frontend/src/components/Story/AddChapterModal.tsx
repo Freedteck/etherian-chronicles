@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import toast from "react-hot-toast";
 import { Card } from "../ui/card";
 
 interface ChapterData {
@@ -44,7 +44,6 @@ const AddChapterModal = ({
   chapterNumber,
   onChapterAdded,
 }: AddChapterModalProps) => {
-  const { toast } = useToast();
   const [newOption, setNewOption] = useState("");
 
   const [formData, setFormData] = useState<ChapterData>({
@@ -88,38 +87,15 @@ const AddChapterModal = ({
     e.preventDefault();
 
     if (!validateForm()) {
-      toast({
-        variant: "destructive",
-        title: "Form Validation failed",
-        description: "Fill out all required part of the form",
-      });
+      toast.error("fill out all required part of the form");
       return;
     }
-    const toastResult = toast({
-      title: "Adding Chapter",
-      description: "Chapter is being added. Please wait...",
-    });
 
-    try {
-      await onChapterAdded(formData);
-      toast({
-        variant: "success",
-        title: "Chapter added successfully",
-        description: "New Chapter added successfully.",
-      });
-
-      // Reset form
-      setFormData({ title: "", content: "", votingOptions: [] });
-      setNewOption("");
-      onClose();
-    } catch (error) {
-      console.log(error);
-      toast({
-        variant: "destructive",
-        title: "Adding Chapter failed",
-        description: `Error adding chapter, please try again`,
-      });
-    }
+    await onChapterAdded(formData);
+    // Reset form
+    setFormData({ title: "", content: "", votingOptions: [] });
+    setNewOption("");
+    onClose();
   };
 
   const addVotingOption = () => {

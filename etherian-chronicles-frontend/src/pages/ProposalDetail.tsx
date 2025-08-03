@@ -13,16 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Layout/Header";
-import { useToast } from "@/hooks/use-toast";
 import { getUserProposalVote, resolveProposal } from "@/data/proposalData";
 import { formatAddress, getTimeAgo, getTimeRemaining } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
 import ProposalLoading from "@/components/ui/proposalLoading";
 import { StoryDataContext } from "@/contexts/storyDataContext";
+import toast from "react-hot-toast";
 
 const ProposalDetail = () => {
   const { id } = useParams();
-  const { toast } = useToast();
   const [hasVoted, setHasVoted] = useState(false);
   const [userVote, setUserVote] = useState(null);
   const [proposal, setProposal] = useState(null);
@@ -77,63 +76,45 @@ const ProposalDetail = () => {
   const handleVote = async (voteType) => {
     if (hasVoted) return;
 
-    const toastResult = toast({
-      title: "Submitting your vote...",
-      description: "Please wait while we process your vote.",
-    });
+    const toastId = toast.loading("Please wait while we process your vote.");
 
     try {
       const transactionHash = await voteOnProposal(proposal?.storyId, voteType);
-
-      toast({
-        variant: "success",
-        title: "Vote submitted",
-        description: `You voted ${
-          voteType === 1 ? "For" : "Against"
-        } the proposal.`,
-      });
+      toast.dismiss(toastId);
+      toast.success(
+        `You voted ${voteType === 1 ? "For" : "Against"} the proposal.`
+      );
       console.log(transactionHash);
 
       setHasVoted(true);
       setUserVote(voteType);
     } catch (error) {
       console.log(error);
-
-      toast({
-        variant: "destructive",
-        title: "Vote failed",
-        description: `There was an error submitting your vote: ${error.message}`,
-      });
+      toast.dismiss(toastId);
+      toast.error(`There was an error submitting your vote: ${error.message}`);
     }
   };
 
   const handleResolve = async () => {
+    const toastId = toast.loading("Resolving Proposal...");
     try {
       const transactionHash = await resolveStoryProposal(proposal?.storyId);
-
-      toast({
-        variant: "success",
-        title: "Proposal resolved",
-        description: "The proposal has been resolved successfully.",
-      });
+      toast.dismiss(toastId);
+      toast.success("The proposal has been resolved successfully.");
 
       console.log(transactionHash);
     } catch (error) {
       console.log(error);
-      toast({
-        variant: "destructive",
-        title: "Resolution failed",
-        description: `There was an error resolving the proposal: ${error.message}`,
-      });
+      toast.dismiss(toastId);
+      toast.error(
+        `There was an error resolving the proposal: ${error.message}`
+      );
     }
   };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Link copied!",
-      description: "Share this proposal with others.",
-    });
+    toast("Link copied!, Share this proposal with others.");
   };
   const isAuthorOrCollaborator = proposal?.collaborators.includes(
     account?.address

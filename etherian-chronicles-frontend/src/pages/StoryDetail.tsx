@@ -18,16 +18,15 @@ import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Layout/Header";
 import VotingInterface from "@/components/Story/VotingInterface";
 import AddChapterModal from "@/components/Story/AddChapterModal";
-import { useToast } from "@/hooks/use-toast";
 import { Blobbie, useActiveAccount } from "thirdweb/react";
 import { getVoteCastEvents, resolveChapter } from "@/data/proposalData";
 import { formatAddress, getTimeAgo } from "@/lib/utils";
 import ProposalLoading from "@/components/ui/proposalLoading";
 import { StoryDataContext } from "@/contexts/storyDataContext";
+import toast from "react-hot-toast";
 
 const StoryDetail = () => {
   const { id } = useParams();
-  const { toast } = useToast();
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [userVotes, setUserVotes] = useState({});
   const [showAddChapterModal, setShowAddChapterModal] = useState(false);
@@ -90,6 +89,7 @@ const StoryDetail = () => {
 
   const handleVote = async (chapterId: number, choiceId: number) => {
     console.log("Voting for choice:", choiceId);
+    const toastId = toast.loading(`Voting for choice: ${choiceId}`);
     try {
       const transactionHash = await voteOnChapter(
         story.storyId,
@@ -97,94 +97,77 @@ const StoryDetail = () => {
         choiceId
       );
       console.log(`Vote cast successfully: ${transactionHash}`);
-      toast({
-        variant: "success",
-        title: "Vote recorded!",
-        description: "Your choice will help shape the story's direction.",
-      });
+      toast.dismiss(toastId);
+      toast.success(
+        "Vote Recorded, your choice will help shape the story's direction."
+      );
     } catch (error) {
       console.log(error);
-      toast({
-        variant: "destructive",
-        title: "Vote failed",
-        description: `There was an error submitting your vote: ${error.message}`,
-      });
+      toast.dismiss(toastId);
+      toast.error(`Vote failed, ${error.message}`);
     }
   };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Link copied!",
-      description: "Share this epic tale with others.",
-    });
+    toast("Link copied!, Share this epic tale with others.");
   };
 
   const handleResolve = async () => {
     if (!story) return;
-    toast({
-      title: "Resolving Chapter",
-      description: "Please wait while we resolve the chapter.",
-    });
+    const toastId = toast.loading(
+      "Please wait while the chapter is being resolved."
+    );
     try {
       const transactionHash = await resolveStoryChapter(
         story.storyId,
         currentChapter.chapterId
       );
-      toast({
-        variant: "success",
-        title: "Chapter Resolved!",
-        description: "The chapter has been resolved successfully.",
-      });
+      toast.dismiss(toastId);
+      toast.success(
+        `Chapter Resolved!
+        The chapter has been resolved successfully.`
+      );
 
       console.log(`Chapter resolved successfully: ${transactionHash}`);
     } catch (error) {
       console.error("Error resolving chapter:", error);
-      toast({
-        variant: "destructive",
-        title: "Error Resolving Chapter",
-        description: `There was an error resolving the chapter:${error.message}`,
-      });
+      toast.dismiss(toastId);
+      toast.error("There was an error resolving the chapter, please try again");
     }
   };
 
   const handleEndStory = async () => {
     if (!story) return;
-    toast({
-      title: "Ending Story",
-      description: "Please wait while we end the story.",
-    });
+    const toastId = toast.loading("Please wait while we end the story.");
     try {
       const transactionHash = await endStory(story.storyId);
-      toast({
-        variant: "success",
-        title: "Story Ended!",
-        description: "The story has been ended successfully.",
-      });
+      toast.dismiss(toastId);
+      toast.success("The story has been ended successfully.");
       console.log(`Story ended successfully: ${transactionHash}`);
     } catch (error) {
       console.error("Error ending story:", error);
-      toast({
-        variant: "destructive",
-        title: "Error Ending Story",
-        description: `There was an error ending the story: ${error.message}`,
-      });
+      toast.dismiss(toastId);
+      toast.error(`There was an error ending the story: ${error.message}`);
     }
   };
 
   const handleChapterAdded = async (formData) => {
-    toast({
-      title: "Adding Chapter",
-      description: "Please wait while we add your chapter.",
-    });
+    const toastId = toast.loading("Please wait while we add your chapter.");
 
-    const transaction = await addChapter(story, formData);
+    try {
+      const transaction = await addChapter(story, formData);
 
-    console.log(`Chapter added successfully: ${transaction}`);
-    toast({
-      title: "Chapter Added!",
-      description: "Your chapter has been added to the story.",
-    });
+      console.log(`Chapter added successfully: ${transaction}`);
+      toast.dismiss(toastId);
+      toast.success("Your chapter has been added to the story.");
+    } catch (error) {
+      console.log(error);
+      toast.dismiss(toastId);
+      toast.error(
+        "There was an error while adding the chapter, please try again"
+      );
+    }
   };
 
   // Check if current user is author or collaborator
