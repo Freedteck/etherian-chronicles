@@ -61,7 +61,7 @@ const Header = () => {
               </Link>
             )}
           </nav>
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
 
           {/* Connect Button */}
           <div className="hidden md:flex items-center space-x-4">
