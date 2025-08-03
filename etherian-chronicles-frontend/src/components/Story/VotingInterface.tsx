@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { CheckCircle, Clock, Users, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import toast from "react-hot-toast";
 
 const VotingInterface = ({ chapter, onVote, userVote = null }) => {
   const [timeLeft, setTimeLeft] = useState("");
-  const { toast } = useToast();
   const selectedChoice = userVote;
 
   // Calculate time remaining
@@ -46,11 +45,9 @@ const VotingInterface = ({ chapter, onVote, userVote = null }) => {
     if (chapter.isResolved) return;
     onVote(choiceId);
 
-    toast({
-      title: "Vote Cast!",
-      description:
-        "Your vote has been recorded. The community decides the story's path.",
-    });
+    toast(
+      "Your vote has been recorded. The community decides the story's path."
+    );
   };
 
   const totalVotes = chapter.voteCountSum;

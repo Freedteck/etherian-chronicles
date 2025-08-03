@@ -89,7 +89,7 @@ const StoryDetail = () => {
 
   const handleVote = async (chapterId: number, choiceId: number) => {
     console.log("Voting for choice:", choiceId);
-    const toastId = toast.loading(`Voting for choice: ${choiceId}`);
+    const toastId = toast.loading("Submiting your vote, please hold on");
     try {
       const transactionHash = await voteOnChapter(
         story.storyId,

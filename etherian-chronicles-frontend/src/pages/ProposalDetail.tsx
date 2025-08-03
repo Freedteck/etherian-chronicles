@@ -96,7 +96,7 @@ const ProposalDetail = () => {
   };
 
   const handleResolve = async () => {
-    const toastId = toast.loading("Resolving Proposal...");
+    const toastId = toast.loading("Resolving Proposal, please wait!");
     try {
       const transactionHash = await resolveStoryProposal(proposal?.storyId);
       toast.dismiss(toastId);

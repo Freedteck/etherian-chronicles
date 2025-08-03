@@ -6,9 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { useRef } from "react";
 import { uploadFileToPinata } from "@/lib/pinata";
+import toast from "react-hot-toast";
 
 interface StoryDetailsStepProps {
   data: {
@@ -45,7 +45,6 @@ const StoryDetailsStep = ({
   errors,
   onUpdate,
 }: StoryDetailsStepProps) => {
-  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenreAdd = (genre: string) => {
@@ -71,24 +70,14 @@ const StoryDetailsStep = ({
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      toast({
-        title: "Uploading cover image...",
-        description: `Uploading ${file.name}...`,
-      });
+      toast(`Uploading ${file.name}...`);
       const fileUrl = await uploadFileToPinata(file);
       if (!fileUrl) {
-        toast({
-          variant: "destructive",
-          title: "Error uploading cover image",
-          description: "Please try again later.",
-        });
+        toast.error("Error uploading cover image, Please try again later.");
         return;
       }
       onUpdate({ coverImage: fileUrl });
-      toast({
-        title: `${file.name} uploaded`,
-        description: "Cover image file selected successfully",
-      });
+      toast.success(`${file.name} uploaded successfully`);
     }
   };
 
