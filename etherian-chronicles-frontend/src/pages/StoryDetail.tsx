@@ -182,7 +182,7 @@ const StoryDetail = () => {
               <Link to="/stories">
                 <Button
                   variant="ghost"
-                  className="text-white hover:bg-white/20"
+                  className="text-foreground hover:bg-white/20"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Stories
@@ -206,16 +206,16 @@ const StoryDetail = () => {
                     ? "Complete Story"
                     : "Paused Story"}
                 </Badge>
-                <div className="text-white/80 text-sm">
+                <div className="text-foreground/80 text-sm">
                   Chapter {currentChapterIndex + 1} of {story.chapters.length}
                 </div>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white mb-4 leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-foreground  mb-4 leading-tight">
                 {story.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 text-white/80 text-sm mb-4">
+              <div className="flex flex-wrap items-center gap-4 text-foreground/80 text-sm mb-4">
                 <div className="flex items-center space-x-1">
                   <Crown className="h-4 w-4" />
                   <span>by {formatAddress(story?.writer)}</span>
@@ -243,9 +243,9 @@ const StoryDetail = () => {
                   </Button>
                 )}
                 <Button
-                  variant="outline"
+                  variant="default"
                   onClick={handleShare}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  // className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
