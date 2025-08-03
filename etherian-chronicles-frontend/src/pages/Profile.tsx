@@ -15,14 +15,20 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Layout/Header";
 import PageBanner from "@/components/Layout/PageBanner";
 import { StoryDataContext } from "@/contexts/storyDataContext";
-import { Blobbie } from "thirdweb/react";
-import { formatAddress, getRarityConfig, getTimeAgo } from "@/lib/utils";
+import { Blobbie, useActiveAccount } from "thirdweb/react";
+import {
+  formatAddress,
+  getRarityConfig,
+  getTimeAgo,
+  getUserLevelConfig,
+} from "@/lib/utils";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ProfileDataContext } from "@/contexts/profileDataContext";
 import NFTCard from "@/components/NFT/NftCard";
+import ProposalLoading from "@/components/ui/proposalLoading";
 
 const Profile = () => {
-  const { stories } = useContext(StoryDataContext);
+  const { stories, isLoading: storiesLoading } = useContext(StoryDataContext);
   const { userId } = useParams();
   const {
     claimableBonuses,
@@ -33,8 +39,10 @@ const Profile = () => {
     mintCompletionFragment,
     userProfile,
   } = useContext(ProfileDataContext);
+  const account = useActiveAccount();
 
   const currentUser = userId.toLocaleLowerCase();
+  const isOwner = currentUser === account?.address.toLocaleLowerCase();
   const nftCollections = [...ownedNFTs, ...claimableNFTs, ...claimableBonuses];
   const achievements = [...ownedNFTs];
   const claimables = [...claimableNFTs, ...claimableBonuses];
@@ -48,8 +56,11 @@ const Profile = () => {
     { id: "stories", label: "My Stories", icon: BookOpen },
     { id: "collaborations", label: "Collaborations", icon: Users },
     { id: "collection", label: "NFT Collection", icon: Award },
-    { id: "claimables", label: "Claimables", icon: Star },
   ];
+
+  if (isOwner) {
+    tabs.push({ id: "claimables", label: "Claimables", icon: Star });
+  }
 
   // User data
   const userStories = stories?.filter(
@@ -66,6 +77,10 @@ const Profile = () => {
   const userCollaborations = stories?.filter((story) =>
     story.collaborators.some((collab) => collab?.toLowerCase() === currentUser)
   );
+
+  if (storiesLoading || isLoading) {
+    return <ProposalLoading />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,10 +109,19 @@ const Profile = () => {
                   {formatAddress(currentUser)}
                 </h2>
                 <div className="flex items-center space-x-2 mb-3">
-                  <Badge className="bg-primary/90 text-white">
-                    <Crown className="h-3 w-3 mr-1" />
-                    Legendary Storyteller
-                  </Badge>
+                  {(() => {
+                    const levelConfig = getUserLevelConfig(
+                      userStories?.length || 0
+                    );
+                    return (
+                      <Badge className={levelConfig.color}>
+                        {React.createElement(levelConfig.icon, {
+                          className: "h-3 w-3 mr-1",
+                        })}
+                        {levelConfig?.name}
+                      </Badge>
+                    );
+                  })()}
                   <div className="flex items-center space-x-1 text-sm text-muted-foreground">
                     <Star className="h-3 w-3 text-primary" />
                     <span>{userProfile?.totalPoints || 0} reputation</span>
@@ -105,14 +129,17 @@ const Profile = () => {
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
                   Master storyteller crafting epic tales since{" "}
-                  {new Date(userProfile?.registeredAt * 1000).getFullYear() ||
-                    "2025"}
+                  {new Date(
+                    userProfile?.registeredAt.toString() * 1000
+                  ).getFullYear() || "2025"}
                 </p>
                 <div className="flex flex-row gap-4">
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-3 w-3 mr-2" />
-                    Edit Profile
-                  </Button>
+                  {isOwner && (
+                    <Button variant="outline" size="sm">
+                      <Settings className="h-3 w-3 mr-2" />
+                      Edit Profile
+                    </Button>
+                  )}
                   <Link to="/create">
                     <Button size="sm" variant="secondary">
                       <Crown className="h-4 w-4 mr-2" />
@@ -224,7 +251,9 @@ const Profile = () => {
                       Member Since
                     </span>
                     <span className="text-sm font-medium">
-                      {new Date(userProfile?.registeredAt * 1000).getFullYear()}
+                      {new Date(
+                        userProfile?.registeredAt * 1000
+                      ).getFullYear() || "2024"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -362,7 +391,7 @@ const Profile = () => {
                               </div>
                               <div className="flex items-center gap-1">
                                 <Vote className="h-3 w-3" />
-                                <span>{story.votesTotal} votes</span>
+                                <span>{story?.votesTotal} votes</span>
                               </div>
                             </div>
                           </div>

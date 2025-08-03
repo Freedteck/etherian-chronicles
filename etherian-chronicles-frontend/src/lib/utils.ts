@@ -7,6 +7,7 @@ import CONTRACT_ADDRESS_JSON from "../deployed_addresses.json";
 import { EtherianChronicle__factory } from "@/typechain-types";
 import { checksumAddress } from "thirdweb/utils";
 import { format, fromUnixTime, formatDistanceToNow, isPast } from "date-fns";
+import { Award, BookOpen, Crown, Star, User } from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -139,4 +140,53 @@ export const getRarityConfig = (rarity) => {
     },
   };
   return rarityConfigs[rarity] || rarityConfigs[0];
+};
+
+export const getUserLevelConfig = (storiesCount: number) => {
+  if (storiesCount === 0) {
+    return {
+      level: 0,
+      name: "New User",
+      icon: User,
+      color: "bg-gray-500/90 text-white",
+      bgColor: "bg-gray-500/10",
+      textColor: "text-gray-600",
+    };
+  } else if (storiesCount <= 2) {
+    return {
+      level: 1,
+      name: "Rising Writer",
+      icon: Star,
+      color: "bg-blue-500/90 text-white",
+      bgColor: "bg-blue-500/10",
+      textColor: "text-blue-600",
+    };
+  } else if (storiesCount <= 5) {
+    return {
+      level: 2,
+      name: "Story Crafter",
+      icon: BookOpen,
+      color: "bg-green-500/90 text-white",
+      bgColor: "bg-green-500/10",
+      textColor: "text-green-600",
+    };
+  } else if (storiesCount <= 10) {
+    return {
+      level: 3,
+      name: "Master Storyteller",
+      icon: Award,
+      color: "bg-purple-500/90 text-white",
+      bgColor: "bg-purple-500/10",
+      textColor: "text-purple-600",
+    };
+  } else {
+    return {
+      level: 4,
+      name: "Legendary Creator",
+      icon: Crown,
+      color: "bg-amber-500/90 text-white",
+      bgColor: "bg-amber-500/10",
+      textColor: "text-amber-600",
+    };
+  }
 };
