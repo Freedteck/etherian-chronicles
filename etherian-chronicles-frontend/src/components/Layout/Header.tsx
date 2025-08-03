@@ -68,10 +68,11 @@ const Header = () => {
             <ConnectButton
               client={client}
               wallets={wallets}
-              accountAbstraction={{
-                chain: etherlinkTestnet, // replace with the chain you want
-                sponsorGas: true,
-              }}
+              chain={etherlinkTestnet}
+              // accountAbstraction={{
+              //   chain: etherlinkTestnet, // replace with the chain you want
+              //   sponsorGas: true,
+              // }}
               connectModal={{ size: "compact" }}
               theme={darkTheme({
                 colors: {
