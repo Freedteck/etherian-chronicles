@@ -13,8 +13,14 @@ import Profile from "./pages/Profile";
 import CreateStory from "./pages/CreateStory";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import RegistrationModal from "./components/ui/RegistrationModal";
+import { getUserCompleteProfile } from "./data/proposalData";
+import { useActiveAccount } from "thirdweb/react";
 
 const queryClient = new QueryClient();
+// const account = useActiveAccount();
+
+// getUserCompleteProfile(account.address);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
