@@ -9,7 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "cp ../etherian-chronicles-contract/ignition/deployments/chain-128123/deployed_addresses.json ./src  &&  typechain --target=ethers-v6 --out-dir=./src/typechain-types --show-stack-traces ../etherian-chronicles-contract/artifacts/contracts/EtherianChronicles.sol/EtherianChronicle.json"
+    // "postinstall": "cp ../etherian-chronicles-contract/ignition/deployments/chain-128123/deployed_addresses.json ./src  &&  typechain --target=ethers-v6 --out-dir=./src/typechain-types --show-stack-traces ../etherian-chronicles-contract/artifacts/contracts/EtherianChronicles.sol/EtherianChronicle.json"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",
