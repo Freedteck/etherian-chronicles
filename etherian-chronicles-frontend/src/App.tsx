@@ -39,31 +39,31 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <RegistrationModal
-            isOpen={showRegistrationModal}
-            onClose={() => setShowRegistrationModal(false)}
-          />
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/stories" element={<Stories />} />
-              <Route path="/stories/:id" element={<StoryDetail />} />
-              <Route path="/proposals" element={<Proposals />} />
-              <Route path="/proposals/:id" element={<ProposalDetail />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/profile/:userId" element={<Profile />} />
-              <Route path="/create" element={<CreateStory />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
+      {/* <ThemeProvider> */}
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <RegistrationModal
+          isOpen={showRegistrationModal}
+          onClose={() => setShowRegistrationModal(false)}
+        />
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/stories" element={<Stories />} />
+            <Route path="/stories/:id" element={<StoryDetail />} />
+            <Route path="/proposals" element={<Proposals />} />
+            <Route path="/proposals/:id" element={<ProposalDetail />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/profile/:userId" element={<Profile />} />
+            <Route path="/create" element={<CreateStory />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+      {/* </ThemeProvider> */}
     </QueryClientProvider>
   );
 };
